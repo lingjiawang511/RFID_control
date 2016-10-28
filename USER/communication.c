@@ -1,223 +1,161 @@
 #include"HeadType.h"
+/********************全局变量定义****************/
 
-Answer_Type 	 PC_Answer;
+//=====================命令======================
+unsigned char static ComSet[]={0x03, COMM_CONTROL_ANTENNA, 0x03};
+ //设置打开天线和关闭自动循卡
+unsigned char static ComSearchCard[]={0x03,COMM_MIFARE_SEARCH_CARD, 0x00};
+//寻卡后读出卡号
+unsigned char static cReadBlock[]={0x0A,COMM_READ_BLOCK, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+//读块No.3第1扇区的密码和控制字
+unsigned char static ComReadBlock3[]={0x0A,COMM_READ_BLOCK,0x00, 0x03, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+//读块No.1
+unsigned char static ComReadBlock1[]={0x0A,COMM_READ_BLOCK,0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+//写块No.1
+unsigned char static ComWriteBlock1[]={0X1A,COMM_WRITE_BLOCK, 
+	   								0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+       								0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+       								0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
 
+//初始化钱包No.5 的值为0x12345678
+unsigned char static ComIntiPurse5[]={0x0E,COMM_INIT_PURSE, 
+	                                0x00, 0x05, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff , 
+									0x00, 0x00, 0x00, 0x00};
+								    //0xff, 0xff, 0xff, 0x7f};//YZ MAX:0x7FFFFFFF
+									//0x00, 0x00, 0x00, 0x80};
 
-COMM_Send_Union_Type PC_Host_Rec;	//PC机作为主机时的结构体接收变量
-// COMM_Rec_Union_Type  PC_Hosr_Send;//PC机作为主机时的结构体发送应答变量
+//读钱包的值No.5
+unsigned char static ComReadPurse5[]={0x0A,COMM_READ_PURSE,
+									0x00, 0x05, 0xff, 0xff, 0xff, 0xff, 0xff,0xff};
 
-COMM_Send_Union_Type MCU_Host_Send;//MCU作为主机时的结构体发送变量
-COMM_Rec_Union_Type  MCU_Host_Rec;//MCU作为主机时的结构体接收应答变量
-MCU_State_Type MCU_State;					//MCU作为主机还是从机状态
+//读钱包的值No.6
+unsigned char static ComReadPurse6[]={0x0A,COMM_READ_PURSE,
+									0x00, 0x06, 0xff, 0xff, 0xff, 0xff, 0xff,0xff};
 
-CH_Work Channel;									//四个发药通道控制变量
-Belt_Work_Type belt;							//皮带控制变量
+//钱包值加2	    
+unsigned char static ComIncrPurse5[]={0x0E,COMM_INC_VALUE, 
+	   								0x00, 0x05, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
+									0x02, 0x00, 0x00, 0x00};
+									//0xff, 0xff, 0xff, 0x7f};//YZ MAX:0x7FFFFFFF
+									//0x00, 0x00, 0x00, 0x80};
+//钱包值减1
+unsigned char static ComDecrPurse5[]={0x0E,COMM_DEC_VALUE, 
+									0x00, 0x05, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+									0x01, 0x00, 0x00, 0x00};
+									//0xff, 0xff, 0xff, 0x7f};//YZ MAX:0x7FFFFFFF
+									//0x00, 0x00, 0x00, 0x80};
+//钱包备份
+unsigned char static ComBakPurse56[]={0x0B,COMM_BAK_PURSE, 
+	   								0x00, 0x05, 0x06, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+//卡片休眠
+unsigned char static ComHaltCard[]={0x02,COMM_CARD_HALT,0x09};  
+//设置模块空闲睡眠模式
+unsigned char static ComHaltMCU[]={0x02,COMM_SET_MCU_IDLE,0x03};	
+unsigned char static ComSelfSearchCard[]={0x02,COMM_SELF_SEARCH_CARD,0x0E};
 
-//=============================================================================
-//函数名称:SLAVE_Rec_Comm
-//功能概要:PC作为通讯主机时接收的控制字处理并响应
-//参数说明:无
-//函数返回:无
-//注意    :无
-//=============================================================================
-static u8  SLAVE_Rec_Comm(void)
-{
-	u8 i,res;
-	u16 crc;
-	if(Usart1_Control_Data.rx_count < 18){
-		res = 2;
-		return res;
-	}crc=CRC_GetCCITT(Usart1_Control_Data.rxbuf,Usart1_Control_Data.rx_count-4);//帧结束尾不做校验
-	if((Usart1_Control_Data.rxbuf[Usart1_Control_Data.rx_count-3]+\
- 	    Usart1_Control_Data.rxbuf[Usart1_Control_Data.rx_count-4]*256 == crc)){	    
-		for(i = 0;i < 18;i++){
-            PC_Host_Rec.send_buf[i] = Usart1_Control_Data.rxbuf[i];
-        }//把数据复制给主机通讯结构体
-		switch(PC_Host_Rec.control.ch1_state){
-		case 0x00:
-							Channel.ch1.send_num = 0;
-							Channel.ch1.state = READY;	 
-							break;
-		case 0x01:Channel.ch1.send_num = PC_Host_Rec.control.ch1_num;	
-							Channel.ch1.send_actual = 0;
-							Channel.ch1.state = READY ;
-							PC_Host_Rec.control.ch1_state = 0;
-							break;
-		default : Channel.ch1.send_num = 0;
-							Channel.ch1.state = READY;
-							break;
-		}
-		switch(PC_Host_Rec.control.ch2_state){
-		case 0x00:	
-							Channel.ch2.send_num = 0;
-							Channel.ch2.state = READY;
-							break;
-		case 0x01:Channel.ch2.send_num = PC_Host_Rec.control.ch2_num;	
-							Channel.ch2.send_actual = 0;
-							Channel.ch2.state = READY ;
-							PC_Host_Rec.control.ch2_state = 0;
-							break;
-		default : Channel.ch2.send_num = 0;
-							Channel.ch2.state = READY;
-							break;
-		}
-		switch(PC_Host_Rec.control.ch3_state){
-		case 0x00:
-							Channel.ch3.send_num = 0;
-							Channel.ch3.state = READY;
-							break;
-		case 0x01:Channel.ch3.send_num = PC_Host_Rec.control.ch3_num;	
-							Channel.ch3.send_actual = 0;
-							Channel.ch3.state = READY ;
-							PC_Host_Rec.control.ch3_state = 0;
-							break;
-		default :
-							Channel.ch3.send_num = 0;
-							Channel.ch3.state = READY;
-							break;
-		}
-		switch(PC_Host_Rec.control.ch4_state){
-		case 0x00:	 
-							Channel.ch4.send_num = 0;
-							Channel.ch4.state = READY;
-							break;
-		case 0x01:Channel.ch4.send_num = PC_Host_Rec.control.ch4_num;	
-							Channel.ch4.send_actual = 0;
-							Channel.ch4.state = READY ;
-							PC_Host_Rec.control.ch4_state = 0;
-							break;
-		default :	Channel.ch4.send_num = 0;
-							Channel.ch4.state = READY;
-							break;
-		}
-		switch(PC_Host_Rec.control.belt_state){
-		case 0x00:	 
-							break;
-		case 0x01:belt.send_time = PC_Host_Rec.control.belt_time;	
-							belt.actual_time = belt.send_time *400; //*2s
-							belt.state = READY ;
-							PC_Host_Rec.control.belt_state = 0;
-							break;
-		default : break;
-		}		
-			res = 0;	
-	}else{
-		 res = 1;
-	}
-	Usart1_Control_Data.tx_count = 0;
-	Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x01;
-	Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x58;
-	Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x00;
-	Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x02;
-	if(res == 0)//接收的数据正确
+static u8 check_xor_sum(u8 len,u8 *pdata){
+	u8 checksum=0;
+		while(len)
 	{
-			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x01;
-			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x00;
-			crc=CRC_GetCCITT(Usart1_Control_Data.txbuf,Usart1_Control_Data.tx_count);
-			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = (crc>>8)&0xFF; ;
-			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = crc&0xFF;	
-	}else if(res == 1){//CRC校验错误
-			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x00;
-			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x00;
-			crc=CRC_GetCCITT(Usart1_Control_Data.txbuf,Usart1_Control_Data.tx_count);
-			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = (crc>>8)&0xFF; ;
-			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = crc&0xFF;
+	  checksum ^= (*pdata);
+	  pdata++;
+	  len--;
 	}
-	Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x0D;
-	Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x0A;
-	return res;
+
+	return checksum;
 }
-//=============================================================================
-//函数名称:SLAVE_Rec_Comm
-//功能概要:PC作为通讯从机时接收的数据，并处理
-//参数说明:无
-//函数返回:无
-//注意    :连续发送三次或者等待接收超时，将不再发送，并且状态机重新转化为从机模式
-//=============================================================================
-static u8  Host_Rec_Comm(void)
+static void Usart2_Send_RFIDCmd(unsigned char len,unsigned char *pdata)
 {
-	u8 i,res;
-	u16 crc;
-	if(Usart1_Control_Data.rx_count != 10){
-		res = 2;
-		return res;
-	}crc=CRC_GetCCITT(Usart1_Control_Data.rxbuf,Usart1_Control_Data.rx_count-4);
-	if((Usart1_Control_Data.rxbuf[Usart1_Control_Data.rx_count-3]+\
- 	    Usart1_Control_Data.rxbuf[Usart1_Control_Data.rx_count-4]*256 == crc)){	    
-		for(i = 0;i < 10;i++){
-            MCU_Host_Rec.rec_buf[i] = Usart1_Control_Data.rxbuf[i];
-        }//把数据复制给主机通讯结构体
-		if(MCU_Host_Rec.control.comm_state == 1){//PC机应答正确接收了数据
-				res = 0;	
-		}else{
-				res = 3;
+		u8 i;
+		Usart2_Control_Data.tx_count = 0;
+		Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] = 0x00;
+		Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] = 0x00;
+		for(i=0;i<len;i++){
+			Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] = *pdata++;
 		}
-	}else{
-		 res = 1;
-	}
-	return res;
+		Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] = check_xor_sum(len,&Usart2_Control_Data.txbuf[2]);
+  	Usart2_Control_Data.tx_index = 0;
+		USART_SendData(USART2,Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_index++]);
+	
 }
-//=============================================================================
-//函数名称:Execute_Host_Comm
-//功能概要:执行上位机发出的命令
-//参数说明:无
-//函数返回:无
-//注意    :无
-//=============================================================================
-static u8 Execute_Host_Comm(void)
+
+static void Usart3_Send_RFIDCmd(unsigned char len,unsigned char *pdata)
 {
-	u8 res;
-	switch(MCU_State){
-	case SLAVE: res = SLAVE_Rec_Comm();
-							if(0 == res){
-								Usart1_Control_Data.tx_index = 0;
-								USART_SendData(USART1,Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++]);
-								MCU_State = HOST;		//正确接收到PC机发送的控制信息，响应后状态机变为主机模式
-							}else if(1 == res){
-								Usart1_Control_Data.tx_index = 0;
-								USART_SendData(USART1,Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++]);
-							}
-							break;
-	case HOST :	res = Host_Rec_Comm();
-							if(( res== 1)||(res == 3)){//主机没有正确接收到数据，重新发送数据
-								Usart1_Control_Data.tx_index = 0;
-								Usart1_Control_Data.tx_count = 16;	
-								PC_Answer.Nanswer_timeout = NANSWER_TIME;
-								PC_Answer.answer_numout--;
-								USART_SendData(USART1,Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++]);//原来的数据没改变，所以直接发送
-							}else if(res == 0){
-								PC_Answer.answer_state = 0;	
-								MCU_State = SLAVE;		//正确接收到PC机发送的接收状态信息，转化为从机等待下一次PC发送控制信息
-								PC_Answer.Nanswer_timeout = NANSWER_TIME;
-								PC_Answer.answer_numout = NANSWER_NUMOUT;
-							}
-						break;
-	default :MCU_State = SLAVE;		
-					 break ;
-	}
-	return res;
+		u8 i;
+		Usart3_Control_Data.tx_count = 0;
+		Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x00;
+		Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x00;
+		for(i=0;i<len;i++){
+			Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = *pdata++;
+		}
+		Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = check_xor_sum(len,pdata);
+  	Usart3_Control_Data.tx_index = 0;
+		USART_SendData(USART3,Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_index++]);
+	
 }
 
-//=============================================================================
-//函数名称:Respond_Host_Comm
-//功能概要:响应上位机的发出的数据命令，数据已经从串口一接收完整
-//参数说明:无
-//函数返回:无
-//注意    :无
-//=============================================================================
-void Respond_Host_Comm(void)
+void Do_Usrat2_RFIDCmd(u8 cmd )
 {
-    if (1 == Usart1_Control_Data.rx_aframe){    
-				Execute_Host_Comm();		
-				Usart1_Control_Data.rx_count = 0;
-				Auto_Frame_Time1 = AUTO_FRAME_TIMEOUT1;
-				Usart1_Control_Data.rx_aframe = 0;
-    }else{
-        return;
-    }
+	switch(cmd){
+	case COMM_SET_MCU_IDLE: //设置模块空闲睡眠模式
+		Usart2_Send_RFIDCmd(ComHaltMCU[0],ComHaltMCU);break ;
+	case COMM_CONTROL_ANTENNA://模块天线控制、自动寻卡设置
+		Usart2_Send_RFIDCmd(ComSet[0],ComSet);break ;
+	case COMM_MIFARE_SEARCH_CARD://TYPE-A寻卡
+		Usart2_Send_RFIDCmd(ComSearchCard[0],ComSearchCard);break ;
+	case COMM_READ_BLOCK: //读块
+		Usart2_Send_RFIDCmd(ComReadBlock1[0],ComReadBlock1);break ;
+	case COMM_WRITE_BLOCK://写块
+		Usart2_Send_RFIDCmd(ComWriteBlock1[0],ComWriteBlock1);break ;
+	case COMM_INIT_PURSE:  //初始化钱包
+		Usart2_Send_RFIDCmd(ComIntiPurse5[0],ComIntiPurse5);break ;
+	case COMM_READ_PURSE://读取钱包
+		Usart2_Send_RFIDCmd(ComReadPurse5[0],ComReadPurse5);break ;
+	case COMM_INC_VALUE://充值
+		Usart2_Send_RFIDCmd(ComIncrPurse5[0],ComIncrPurse5);break ;
+	case COMM_DEC_VALUE: //扣款
+		Usart2_Send_RFIDCmd(ComDecrPurse5[0],ComDecrPurse5);break ;
+	case COMM_BAK_PURSE:  //备份钱包值
+		Usart2_Send_RFIDCmd(ComBakPurse56[0],ComBakPurse56);break ;
+	case COMM_CARD_HALT://卡休眠
+		Usart2_Send_RFIDCmd(ComHaltCard[0],ComHaltCard);break ;
+	case COMM_SELF_SEARCH_CARD:
+		Usart2_Send_RFIDCmd(ComSelfSearchCard[0],ComSelfSearchCard);break ;
+	default :break ;
+	}
+	
 }
 
 
-
-
-
+void Do_Usrat3_RFIDCmd(u8 cmd )
+{
+	switch(cmd){
+	case COMM_SET_MCU_IDLE: //设置模块空闲睡眠模式
+		Usart3_Send_RFIDCmd(ComHaltMCU[0],ComHaltMCU);break ;
+	case COMM_CONTROL_ANTENNA://模块天线控制、自动寻卡设置
+		Usart3_Send_RFIDCmd(ComSet[0],ComSet);break ;
+	case COMM_MIFARE_SEARCH_CARD://TYPE-A寻卡
+		Usart3_Send_RFIDCmd(ComSearchCard[0],ComSearchCard);break ;
+	case COMM_READ_BLOCK: //读块
+		Usart3_Send_RFIDCmd(ComReadBlock1[0],ComReadBlock1);break ;
+	case COMM_WRITE_BLOCK://写块
+		Usart3_Send_RFIDCmd(ComWriteBlock1[0],ComWriteBlock1);break ;
+	case COMM_INIT_PURSE:  //初始化钱包
+		Usart3_Send_RFIDCmd(ComIntiPurse5[0],ComIntiPurse5);break ;
+	case COMM_READ_PURSE://读取钱包
+		Usart3_Send_RFIDCmd(ComReadPurse5[0],ComReadPurse5);
+		Usart3_Send_RFIDCmd(ComReadPurse5[0],ComReadPurse6);break ;
+	case COMM_INC_VALUE://充值
+		Usart3_Send_RFIDCmd(ComIncrPurse5[0],ComIncrPurse5);break ;
+	case COMM_DEC_VALUE: //扣款
+		Usart3_Send_RFIDCmd(ComDecrPurse5[0],ComDecrPurse5);break ;
+	case COMM_BAK_PURSE:  //备份钱包值
+		Usart3_Send_RFIDCmd(ComBakPurse56[0],ComBakPurse56);break ;
+	case COMM_CARD_HALT://卡休眠
+		Usart3_Send_RFIDCmd(ComHaltCard[0],ComHaltCard);break ;
+	case COMM_SELF_SEARCH_CARD:
+		Usart3_Send_RFIDCmd(ComSelfSearchCard[0],ComSelfSearchCard);break ;
+	default :break ;
+	}
+	
+}

@@ -1,6 +1,6 @@
 #include"HeadType.h"	
 
-#define	DEVICE1_KEY_IO					GPIO_Pin_11
+#define	DEVICE1_KEY_IO					GPIO_Pin_12
 #define	DEVICE1_KEY_PORT				GPIOB
 
 #define READ_DEVICE1_KEY    		GPIO_ReadInputDataBit(DEVICE1_KEY_PORT,DEVICE1_KEY_IO) //返回的是一个字节，读的是一个位

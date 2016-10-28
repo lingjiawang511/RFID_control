@@ -149,7 +149,7 @@ void TIM2_IRQHandler(void)
 	if ( TIM_GetITStatus(TIM2 , TIM_IT_Update) != RESET ) 
 	{	
 		Led_Flash();
-		key=Key_Scan();
+//		key=Key_Scan();
 		if(key >0){
 			Key_ScanNum = key;
 			key = 0;
@@ -181,10 +181,12 @@ void USART1_IRQHandler(void)
 {
   
 	if(USART_GetFlagStatus(USART1, USART_FLAG_RXNE)||USART_GetFlagStatus(USART1, USART_FLAG_ORE) != RESET){ //解决数据没接收完一直进中断的问题
-       USART_ClearFlag(USART1,USART_FLAG_RXNE);
+    USART1_Do_Rx(USART_ReceiveData(USART1)); 
+		USART_ClearFlag(USART1,USART_FLAG_RXNE);
 	}
 	if(USART_GetFlagStatus(USART1, USART_FLAG_TC)){
-       USART_ClearFlag(USART1,USART_FLAG_TC);
+    USART1_Do_Tx();  
+		USART_ClearFlag(USART1,USART_FLAG_TC);
 	}
 }
 //=============================================================================
@@ -197,10 +199,12 @@ void USART2_IRQHandler(void)
 {
   
 	if(USART_GetFlagStatus(USART2, USART_FLAG_RXNE)||USART_GetFlagStatus(USART2, USART_FLAG_ORE) != RESET){ //解决数据没接收完一直进中断的问题
-       USART_ClearFlag(USART2,USART_FLAG_RXNE);
+    USART2_Do_Rx(USART_ReceiveData(USART2)); 
+		USART_ClearFlag(USART2,USART_FLAG_RXNE);
 	}
 	if(USART_GetFlagStatus(USART2, USART_FLAG_TC)){
-       USART_ClearFlag(USART2,USART_FLAG_TC);
+    USART2_Do_Tx();   
+		USART_ClearFlag(USART2,USART_FLAG_TC);
 	}
 }
 
@@ -214,10 +218,12 @@ void USART3_IRQHandler(void)
 {
   
 	if(USART_GetFlagStatus(USART3, USART_FLAG_RXNE)||USART_GetFlagStatus(USART3, USART_FLAG_ORE) != RESET){ //解决数据没接收完一直进中断的问题
-       USART_ClearFlag(USART3,USART_FLAG_RXNE);
+    USART3_Do_Rx(USART_ReceiveData(USART3));  
+		USART_ClearFlag(USART3,USART_FLAG_RXNE);
 	}
 	if(USART_GetFlagStatus(USART3, USART_FLAG_TC)){
-       USART_ClearFlag(USART3,USART_FLAG_TC);
+    USART3_Do_Tx();  
+		USART_ClearFlag(USART3,USART_FLAG_TC);
 	}
 }
 

@@ -18,8 +18,10 @@ void USART3_Puts(char * str);
 
 void USART1_Do_Tx(void );
 void USART2_Do_Tx(void );
+void USART3_Do_Tx(void );
 void USART1_Do_Rx(u8 rxdata);
 void USART2_Do_Rx(u8 rxdata);
+void USART3_Do_Rx(u8 rxdata);
 void Respond_Host_Comm(void);
 void Dispose_Data_For_Host(void);
 #endif

@@ -198,7 +198,8 @@ typedef struct{
 extern char Auto_Frame_Time1;
 
 extern  Usart_Type Usart1_Control_Data;
-
+extern Usart_Type Usart2_Control_Data;
+extern Usart_Type Usart3_Control_Data;
 extern  COMM_Send_Union_Type PC_Host_Rec;
 extern  COMM_Rec_Union_Type  PC_Hosr_Send;
 

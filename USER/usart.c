@@ -232,7 +232,7 @@ void USART2_Config(void)
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
     
 
-	USART_InitStructure.USART_BaudRate = 19200; 			 
+	USART_InitStructure.USART_BaudRate = 9600; 			 
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;	   
 	USART_InitStructure.USART_Parity = USART_Parity_No; 	  
@@ -277,7 +277,7 @@ void USART3_Config(void )
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
       
-	USART_InitStructure.USART_BaudRate = 19200; 			 
+	USART_InitStructure.USART_BaudRate = 9600; 			 
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;	   
 	USART_InitStructure.USART_Parity = USART_Parity_No; 	  
