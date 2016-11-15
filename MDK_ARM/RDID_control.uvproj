@@ -521,6 +521,13 @@
         </Group>
         <Group>
           <GroupName>remark</GroupName>
+          <Files>
+            <File>
+              <FileName>调试备注.txt</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\调试备注.txt</FilePath>
+            </File>
+          </Files>
         </Group>
       </Groups>
     </Target>

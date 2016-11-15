@@ -208,7 +208,7 @@ static u8 Usrat2_Rec_RFIDdata(void )
 	u8 i,res;
 	u16 crc;
 	if(Usart2_Control_Data.rx_aframe == 1){
-		if((Usart2_Control_Data.rx_count < 8)||(Usart2_Control_Data.rxbuf[0] != 0xFE)||(Usart2_Control_Data.rxbuf[2] != 0x04)){//接收到的数据位少于八位或者数据头不对是不正常的
+		if((Usart2_Control_Data.rx_count < 8)||(Usart2_Control_Data.rxbuf[0] != 0xFE)||(Usart2_Control_Data.rxbuf[2] != 0x03)){//接收到的数据位少于八位或者数据头不对是不正常的
 			Usart2_Control_Data.rx_aframe = 0;
 			res = 1;
 			return res;
@@ -243,6 +243,8 @@ static u8 Usrat2_Rec_RFIDdata(void )
 		USART_SendData(USART1,Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++]);
 		Usart_Work_State = USART2_WORK; //谁先接收到数据谁先传输
 		Usart2_Control_Data.rx_aframe = 0;
+		Usart1_Control_Data.rx_aframe = 0;	//清空和主机的通讯，避免通讯错误
+		Usart1_Control_Data.rx_count = 0;
 		res = 0;
 	}else{
 		res = 1;
@@ -261,7 +263,7 @@ static u8 Usrat3_Rec_RFIDdata(void )
 	u8 i,res;
 	u16 crc;
 	if(Usart3_Control_Data.rx_aframe == 1){
-		if((Usart3_Control_Data.rx_count < 8)||(Usart3_Control_Data.rxbuf[0] != 0xFE)||(Usart3_Control_Data.rxbuf[2] != 0x04)){//接收到的数据位少于八位或者数据头不对是不正常的
+		if((Usart3_Control_Data.rx_count < 8)||(Usart3_Control_Data.rxbuf[0] != 0xFE)||(Usart3_Control_Data.rxbuf[2] != 0x03)){//接收到的数据位少于八位或者数据头不对是不正常的
 			Usart3_Control_Data.rx_aframe = 0;
 			res = 1;
 			return res;
@@ -277,7 +279,6 @@ static u8 Usrat3_Rec_RFIDdata(void )
 		Usart1_Control_Data.tx_count = 0;	
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x01;
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x58;
-		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x00;
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x05;
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x02;//卡的通道号
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart3_RFIDRec.data[0];
@@ -297,6 +298,8 @@ static u8 Usrat3_Rec_RFIDdata(void )
 		USART_SendData(USART1,Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++]);
 		Usart_Work_State = USART3_WORK; //谁先接收到数据谁先传输
 		Usart3_Control_Data.rx_aframe = 0;
+		Usart1_Control_Data.rx_aframe = 0;	//清空和主机的通讯，避免通讯错误
+		Usart1_Control_Data.rx_count = 0;
 		res = 0;
 	}else{
 		res = 1;
@@ -362,14 +365,14 @@ u8 Execute_Host_Comm(void)
 		res = Usrat2_Rec_RFIDdata();//有RFID信号时跳到相应的状态机等待PC接收数据后响应
 		if(res != 0){
 			res =Usrat3_Rec_RFIDdata();
-		}
+		}	
 		break;
 	case USART2_WORK:
 							if (1 == Usart1_Control_Data.rx_aframe){ 
 									res=Respond_Host_Comm();
 									if(( res== 1)||(res == 3)){//主机没有正确接收到数据，重新发送数据
 										Usart1_Control_Data.tx_index = 0;
-										Usart1_Control_Data.tx_count = 16;	
+										Usart1_Control_Data.tx_count = 12;	
 										PC_Answer.Nanswer_timeout = NANSWER_TIME;
 										if(PC_Answer.answer_numout == 0){
 											Usart_Work_State = NO_USART_WORK;	
@@ -402,7 +405,7 @@ u8 Execute_Host_Comm(void)
 									res=Respond_Host_Comm();
 									if(( res== 1)||(res == 3)){//主机没有正确接收到数据，重新发送数据
 										Usart1_Control_Data.tx_index = 0;
-										Usart1_Control_Data.tx_count = 16;	
+										Usart1_Control_Data.tx_count = 12;	
 										PC_Answer.Nanswer_timeout = NANSWER_TIME;
 										if(PC_Answer.answer_numout == 0){
 											Usart_Work_State = NO_USART_WORK;	
