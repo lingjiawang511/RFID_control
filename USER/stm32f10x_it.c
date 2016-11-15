@@ -154,6 +154,7 @@ void TIM2_IRQHandler(void)
 			Key_ScanNum = key;
 			key = 0;
 		}
+		PC_Communication_Time_ISR();
 		TIM_ClearITPendingBit(TIM2 , TIM_FLAG_Update);  		 
 	}		 	
 }
@@ -167,6 +168,39 @@ void TIM3_IRQHandler(void)
 {
 	if ( TIM_GetITStatus(TIM3 , TIM_IT_Update) != RESET ) 
 	{	
+				if (1 == Usart1_Control_Data.rx_start){
+					if(Auto_Frame_Time1 >0){
+							Auto_Frame_Time1--;
+					}else{
+							Auto_Frame_Time1 = 0;
+							Usart1_Control_Data.rx_aframe = 1; 
+							Usart1_Control_Data.rx_count = Usart1_Control_Data.rx_index;
+							Usart1_Control_Data.rx_start = 0;
+							Usart1_Control_Data.rx_index = 0;
+					}
+			}
+			if (1 == Usart2_Control_Data.rx_start){
+					if(Auto_Frame_Time2 >0){
+							Auto_Frame_Time2--;
+					}else{
+							Auto_Frame_Time2 = 0;
+							Usart2_Control_Data.rx_aframe = 1; 
+							Usart2_Control_Data.rx_count = Usart2_Control_Data.rx_index;
+							Usart2_Control_Data.rx_start = 0;
+							Usart2_Control_Data.rx_index = 0;
+					}
+			}
+		 if (1 == Usart3_Control_Data.rx_start){
+					if(Auto_Frame_Time3 >0){
+							Auto_Frame_Time3--;
+					}else{
+							Auto_Frame_Time3 = 0;
+							Usart3_Control_Data.rx_aframe = 1; 
+							Usart3_Control_Data.rx_count = Usart3_Control_Data.rx_index;
+							Usart3_Control_Data.rx_start = 0;
+							Usart3_Control_Data.rx_index = 0;
+					}
+			}
       TIM_ClearITPendingBit(TIM3 , TIM_FLAG_Update);     
 	}		 	
 }

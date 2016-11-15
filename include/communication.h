@@ -53,8 +53,8 @@
 
 void Do_Usrat2_RFIDCmd(u8 cmd );
 void Do_Usrat3_RFIDCmd(u8 cmd );
-
-
+void PC_Communication_Time_ISR(void );
+u8 Execute_Host_Comm(void);
 #endif
 
 

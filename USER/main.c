@@ -25,15 +25,11 @@ int main(void)
 		USART2_Puts("123456");
     TIM2_Config();
     TIM3_Config();
-		Do_Usrat3_RFIDCmd(COMM_SELF_SEARCH_CARD);
+	//	Do_Usrat3_RFIDCmd(COMM_SELF_SEARCH_CARD);
 		delay_ms(100);
     while(1){
-			Do_Usrat2_RFIDCmd(COMM_MIFARE_SEARCH_CARD);
-			Do_Usrat3_RFIDCmd(COMM_MIFARE_SEARCH_CARD);
-			delay_ms(1000);
-		}
-		
-        
+			Execute_Host_Comm();
+		}       
 }
 
 

@@ -53,6 +53,19 @@ unsigned char static ComHaltCard[]={0x02,COMM_CARD_HALT,0x09};
 unsigned char static ComHaltMCU[]={0x02,COMM_SET_MCU_IDLE,0x03};	
 unsigned char static ComSelfSearchCard[]={0x02,COMM_SELF_SEARCH_CARD,0x0E};
 
+RFID_REC_Type Usart2_RFIDRec;
+RFID_REC_Type Usart3_RFIDRec;
+USART_WORK_Type Usart_Work_State;					//MCU作为主机还是从机状态
+Answer_Type 	 PC_Answer;
+COMM_Rec_Union_Type  MCU_Host_Rec;//MCU作为主机时的结构体接收应答变量
+
+//=============================================================================
+//函数名称: check_xor_sum
+//功能概要:异或和校验函数
+//参数名称:无
+//函数返回:返回校验结果
+//注意    :无
+//=============================================================================
 static u8 check_xor_sum(u8 len,u8 *pdata){
 	u8 checksum=0;
 		while(len)
@@ -64,6 +77,13 @@ static u8 check_xor_sum(u8 len,u8 *pdata){
 
 	return checksum;
 }
+//=============================================================================
+//函数名称:Usart2_Send_RFIDCmd
+//功能概要:串口2发送RFID命令
+//参数名称:len:命令数字长度。pdata:命令字
+//函数返回:无
+//注意    :无
+//=============================================================================
 static void Usart2_Send_RFIDCmd(unsigned char len,unsigned char *pdata)
 {
 		u8 i;
@@ -78,22 +98,36 @@ static void Usart2_Send_RFIDCmd(unsigned char len,unsigned char *pdata)
 		USART_SendData(USART2,Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_index++]);
 	
 }
-
+//=============================================================================
+//函数名称:Usart3_Send_RFIDCmd
+//功能概要:串口3发送RFID命令
+//参数名称:len:命令数字长度。pdata:命令字
+//函数返回:无
+//注意    :无
+//=============================================================================
 static void Usart3_Send_RFIDCmd(unsigned char len,unsigned char *pdata)
 {
 		u8 i;
+	 static u8 test = 0;
 		Usart3_Control_Data.tx_count = 0;
 		Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x00;
 		Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x00;
 		for(i=0;i<len;i++){
 			Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = *pdata++;
 		}
-		Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = check_xor_sum(len,pdata);
+		test = check_xor_sum(len,&Usart3_Control_Data.txbuf[2]);
+		Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = test;
   	Usart3_Control_Data.tx_index = 0;
 		USART_SendData(USART3,Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_index++]);
 	
 }
-
+//=============================================================================
+//函数名称:Do_Usrat2_RFIDCmd
+//功能概要:处理串口2发送RFID命令
+//参数名称:cmd:命令
+//函数返回:无
+//注意    :无
+//=============================================================================
 void Do_Usrat2_RFIDCmd(u8 cmd )
 {
 	switch(cmd){
@@ -122,11 +156,15 @@ void Do_Usrat2_RFIDCmd(u8 cmd )
 	case COMM_SELF_SEARCH_CARD:
 		Usart2_Send_RFIDCmd(ComSelfSearchCard[0],ComSelfSearchCard);break ;
 	default :break ;
-	}
-	
+	}	
 }
-
-
+//=============================================================================
+//函数名称:Do_Usrat3_RFIDCmd
+//功能概要:处理串口3发送RFID命令
+//参数名称:cmd:命令
+//函数返回:无
+//注意    :无
+//=============================================================================
 void Do_Usrat3_RFIDCmd(u8 cmd )
 {
 	switch(cmd){
@@ -157,5 +195,284 @@ void Do_Usrat3_RFIDCmd(u8 cmd )
 		Usart3_Send_RFIDCmd(ComSelfSearchCard[0],ComSelfSearchCard);break ;
 	default :break ;
 	}
-	
 }
+//=============================================================================
+//函数名称:Usrat2_Rec_RFIDdata
+//功能概要:串口2接收到的RFID数据
+//参数说明:无
+//函数返回:无
+//注意    :无
+//=============================================================================
+static u8 Usrat2_Rec_RFIDdata(void )
+{
+	u8 i,res;
+	u16 crc;
+	if(Usart2_Control_Data.rx_aframe == 1){
+		if((Usart2_Control_Data.rx_count < 8)||(Usart2_Control_Data.rxbuf[0] != 0xFE)||(Usart2_Control_Data.rxbuf[2] != 0x04)){//接收到的数据位少于八位或者数据头不对是不正常的
+			Usart2_Control_Data.rx_aframe = 0;
+			res = 1;
+			return res;
+		}
+		if(Usart2_Control_Data.rxbuf[7] !=check_xor_sum(6,&Usart2_Control_Data.rxbuf[1])){
+			Usart2_Control_Data.rx_aframe = 0;
+			res = 1;
+			return res;
+		}
+		for(i=0;i<4;i++){
+			Usart2_RFIDRec.data[i] = Usart2_Control_Data.rxbuf[i+3];
+		}
+		Usart1_Control_Data.tx_count = 0;	
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x01;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x58;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x05;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x01;//卡的通道号
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart2_RFIDRec.data[0];
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart2_RFIDRec.data[1];
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart2_RFIDRec.data[2];
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart2_RFIDRec.data[3];	
+		crc=CRC_GetCCITT(Usart1_Control_Data.txbuf,Usart1_Control_Data.tx_count);
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = (crc>>8)&0xFF; 
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = crc&0xFF;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0X0D;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0X0A;
+		
+		PC_Answer.Nanswer_timeout = NANSWER_TIME;
+		PC_Answer.answer_numout = NANSWER_NUMOUT;
+		PC_Answer.answer_state = 1;
+		Usart1_Control_Data.tx_index = 0;	
+		USART_SendData(USART1,Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++]);
+		Usart_Work_State = USART2_WORK; //谁先接收到数据谁先传输
+		Usart2_Control_Data.rx_aframe = 0;
+		res = 0;
+	}else{
+		res = 1;
+	}
+	return res;
+}
+//=============================================================================
+//函数名称:Usrat2_Rec_RFIDdata
+//功能概要:串口2接收到的RFID数据
+//参数说明:无
+//函数返回:无
+//注意    :无
+//=============================================================================
+static u8 Usrat3_Rec_RFIDdata(void )
+{
+	u8 i,res;
+	u16 crc;
+	if(Usart3_Control_Data.rx_aframe == 1){
+		if((Usart3_Control_Data.rx_count < 8)||(Usart3_Control_Data.rxbuf[0] != 0xFE)||(Usart3_Control_Data.rxbuf[2] != 0x04)){//接收到的数据位少于八位或者数据头不对是不正常的
+			Usart3_Control_Data.rx_aframe = 0;
+			res = 1;
+			return res;
+		}
+		if(Usart3_Control_Data.rxbuf[7] !=check_xor_sum(6,&Usart3_Control_Data.rxbuf[1])){
+			Usart3_Control_Data.rx_aframe = 0;
+			res = 1;
+			return res;
+		}
+		for(i=0;i<4;i++){
+			Usart3_RFIDRec.data[i] = Usart3_Control_Data.rxbuf[i+3];
+		}
+		Usart1_Control_Data.tx_count = 0;	
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x01;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x58;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x00;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x05;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x02;//卡的通道号
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart3_RFIDRec.data[0];
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart3_RFIDRec.data[1];
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart3_RFIDRec.data[2];
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart3_RFIDRec.data[3];	
+		crc=CRC_GetCCITT(Usart1_Control_Data.txbuf,Usart1_Control_Data.tx_count);
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = (crc>>8)&0xFF; 
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = crc&0xFF;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0X0D;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0X0A;
+		
+		PC_Answer.Nanswer_timeout = NANSWER_TIME;
+		PC_Answer.answer_numout = NANSWER_NUMOUT;
+		PC_Answer.answer_state = 1;
+		Usart1_Control_Data.tx_index = 0;	
+		USART_SendData(USART1,Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++]);
+		Usart_Work_State = USART3_WORK; //谁先接收到数据谁先传输
+		Usart3_Control_Data.rx_aframe = 0;
+		res = 0;
+	}else{
+		res = 1;
+	}
+	return res;
+}
+
+
+//=============================================================================
+//函数名称:Respond_Host_Comm
+//功能概要:响应上位机的发出的数据命令，数据已经从串口一接收完整
+//参数说明:无
+//函数返回:无
+//注意    :无
+//=============================================================================
+u8 Respond_Host_Comm(void)
+{
+		u8 i,res;
+		u16 crc;   
+			if(Usart1_Control_Data.rx_count != 10){
+				res = 2;
+				return res;
+			}crc=CRC_GetCCITT(Usart1_Control_Data.rxbuf,Usart1_Control_Data.rx_count-4);
+			if((Usart1_Control_Data.rxbuf[Usart1_Control_Data.rx_count-3]+\
+					Usart1_Control_Data.rxbuf[Usart1_Control_Data.rx_count-4]*256 == crc)){	    
+				for(i = 0;i < 10;i++){
+								MCU_Host_Rec.rec_buf[i] = Usart1_Control_Data.rxbuf[i];
+						}//把数据复制给主机通讯结构体
+				if(MCU_Host_Rec.control.comm_state == 1){//PC机应答正确接收了数据
+						if(Usart_Work_State == USART2_WORK){
+								if(MCU_Host_Rec.control.comm_ch == 0x01){
+										res = 0;	
+								}else{
+										res = 3;
+							 }
+						}else if(Usart_Work_State == USART3_WORK){
+								if(MCU_Host_Rec.control.comm_ch == 0x02){
+										res = 0;	
+								}else{
+										res = 3;
+							 }
+						}
+				}else{
+						res = 3;
+				}
+			}else{
+				 res = 1;
+			}
+		return res;
+}
+//=============================================================================
+//函数名称:Execute_Host_Comm
+//功能概要:执行上位机发出的命令
+//参数说明:无
+//函数返回:无
+//注意    :无
+//=============================================================================
+u8 Execute_Host_Comm(void)
+{
+	u8 res;
+	switch(Usart_Work_State){
+	case NO_USART_WORK:
+		res = Usrat2_Rec_RFIDdata();//有RFID信号时跳到相应的状态机等待PC接收数据后响应
+		if(res != 0){
+			res =Usrat3_Rec_RFIDdata();
+		}
+		break;
+	case USART2_WORK:
+							if (1 == Usart1_Control_Data.rx_aframe){ 
+									res=Respond_Host_Comm();
+									if(( res== 1)||(res == 3)){//主机没有正确接收到数据，重新发送数据
+										Usart1_Control_Data.tx_index = 0;
+										Usart1_Control_Data.tx_count = 16;	
+										PC_Answer.Nanswer_timeout = NANSWER_TIME;
+										if(PC_Answer.answer_numout == 0){
+											Usart_Work_State = NO_USART_WORK;	
+											PC_Answer.Nanswer_timeout = NANSWER_TIME;
+											PC_Answer.answer_numout = NANSWER_NUMOUT;
+											PC_Answer.answer_state = 0;			
+											Usart1_Control_Data.rx_count = 0;
+											Auto_Frame_Time1 = AUTO_FRAME_TIMEOUT1;
+											Usart1_Control_Data.rx_aframe = 0;
+											break;
+										}
+										PC_Answer.answer_numout--;
+										USART_SendData(USART1,Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++]);//原来的数据没改变，所以直接发送
+									}else if(res == 0){
+										PC_Answer.answer_state = 0;	
+										Usart_Work_State = NO_USART_WORK;		//正确接收到PC机发送的接收状态信息，转化为从机等待下一次PC发送控制信息
+										PC_Answer.Nanswer_timeout = NANSWER_TIME;
+										PC_Answer.answer_numout = NANSWER_NUMOUT;
+																				//执行开锁点灯动作
+									}
+									Usart1_Control_Data.rx_count = 0;
+									Auto_Frame_Time1 = AUTO_FRAME_TIMEOUT1;
+									Usart1_Control_Data.rx_aframe = 0;
+							}else{
+								res = 4;
+							}
+							break;
+	case USART3_WORK:							
+						if (1 == Usart1_Control_Data.rx_aframe){ 
+									res=Respond_Host_Comm();
+									if(( res== 1)||(res == 3)){//主机没有正确接收到数据，重新发送数据
+										Usart1_Control_Data.tx_index = 0;
+										Usart1_Control_Data.tx_count = 16;	
+										PC_Answer.Nanswer_timeout = NANSWER_TIME;
+										if(PC_Answer.answer_numout == 0){
+											Usart_Work_State = NO_USART_WORK;	
+											PC_Answer.Nanswer_timeout = NANSWER_TIME;
+											PC_Answer.answer_numout = NANSWER_NUMOUT;
+											PC_Answer.answer_state = 0;			
+											Usart1_Control_Data.rx_count = 0;
+											Auto_Frame_Time1 = AUTO_FRAME_TIMEOUT1;
+											Usart1_Control_Data.rx_aframe = 0;
+											break;
+										}
+										PC_Answer.answer_numout--;
+										USART_SendData(USART1,Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++]);//原来的数据没改变，所以直接发送
+									}else if(res == 0){
+										PC_Answer.answer_state = 0;	
+										Usart_Work_State = NO_USART_WORK;		//正确接收到PC机发送的接收状态信息，转化为从机等待下一次PC发送控制信息
+										PC_Answer.Nanswer_timeout = NANSWER_TIME;
+										PC_Answer.answer_numout = NANSWER_NUMOUT;
+										//执行开锁点灯动作
+									}
+									Usart1_Control_Data.rx_count = 0;
+									Auto_Frame_Time1 = AUTO_FRAME_TIMEOUT1;
+									Usart1_Control_Data.rx_aframe = 0;
+							}else{
+								res = 4;
+							}
+							break;
+	}
+	return res;
+}
+
+//=============================================================================
+//函数名称:Send_Medicine_Time_ISR
+//功能概要:通讯超时或超次数控制
+//参数名称:无
+//函数返回:无
+//注意    :无
+//=============================================================================
+void PC_Communication_Time_ISR(void )
+{
+	if(PC_Answer.answer_state == 1){
+		if(PC_Answer.Nanswer_timeout > 0){
+				PC_Answer.Nanswer_timeout--;
+		}else{//主机超时没有响应，当正确应答处理，MCU转化为从机模式。
+				Usart_Work_State = NO_USART_WORK;	
+				PC_Answer.Nanswer_timeout = NANSWER_TIME;
+				PC_Answer.answer_numout = NANSWER_NUMOUT;
+				PC_Answer.answer_state = 0;			
+		}
+		if(PC_Answer.answer_numout > 0){
+				PC_Answer.answer_numout=PC_Answer.answer_numout;//自减操作不在这里
+		}else{//MCU发送了N此主机都没有响应正确的应答，当正确应答处理，MCU转化为从机模式。
+				Usart_Work_State = NO_USART_WORK;	
+				PC_Answer.Nanswer_timeout = NANSWER_TIME;
+				PC_Answer.answer_numout = NANSWER_NUMOUT;
+				PC_Answer.answer_state = 0;				
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

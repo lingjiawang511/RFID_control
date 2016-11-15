@@ -232,7 +232,7 @@ void USART2_Config(void)
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
     
 
-	USART_InitStructure.USART_BaudRate = 9600; 			 
+	USART_InitStructure.USART_BaudRate = 19200; 			 
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;	   
 	USART_InitStructure.USART_Parity = USART_Parity_No; 	  
@@ -263,21 +263,21 @@ void USART3_Config(void )
 	GPIO_InitTypeDef GPIO_InitStructure;
 	USART_InitTypeDef USART_InitStructure;
 
-	/* Enable the USART2 Pins Software Remapping */
+	/* Enable the USART3 Pins Software Remapping */
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB , ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE); 
 
-	/* Configure USART2 Tx (PB.10) as alternate function push-pull */
+	/* Configure USART3 Tx (PB .10) as alternate function push-pull */
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
-	/* Configure USART2 Rx (PB.11) as input floating */
+	/* Configure USART3 Rx (PB.11) as input floating */
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;	  
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
       
-	USART_InitStructure.USART_BaudRate = 9600; 			 
+	USART_InitStructure.USART_BaudRate = 19200; 			 
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;	   
 	USART_InitStructure.USART_Parity = USART_Parity_No; 	  
@@ -463,6 +463,7 @@ void USART1_Do_Rx(u8 rxdata)
                return ;   //直接返回不接受数据              
             }                    
         }
+				Auto_Frame_Time1 = AUTO_FRAME_TIMEOUT1;
        	Usart1_Control_Data.rxbuf[Usart1_Control_Data.rx_index] = rxdata;
         Usart1_Control_Data.rx_index++;
         if (Usart1_Control_Data.rx_index > (RxBufMax - 1)){
@@ -501,6 +502,7 @@ void USART2_Do_Rx(u8 rxdata)
                return ;   //直接返回不接受数据              
             }                    
         }
+				Auto_Frame_Time2 = AUTO_FRAME_TIMEOUT2;
        	Usart2_Control_Data.rxbuf[Usart2_Control_Data.rx_index] = rxdata;
         Usart2_Control_Data.rx_index++;
         if (Usart2_Control_Data.rx_index > (RxBufMax - 1)){
@@ -539,6 +541,7 @@ void USART3_Do_Rx(u8 rxdata)
                return ;   //直接返回不接受数据              
             }                    
         }
+				Auto_Frame_Time3 = AUTO_FRAME_TIMEOUT3;
        	Usart3_Control_Data.rxbuf[Usart3_Control_Data.rx_index] = rxdata;
         Usart3_Control_Data.rx_index++;
         if (Usart3_Control_Data.rx_index > (RxBufMax - 1)){

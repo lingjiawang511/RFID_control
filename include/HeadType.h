@@ -41,9 +41,9 @@ typedef uint32	ulong;		/**< 32-bit value */
 #define TxBufMax 512
 
 /*自动成帧超时定时时间*/
-#define AUTO_FRAME_TIMEOUT1  100  //10*2ms
-#define AUTO_FRAME_TIMEOUT2  50  //10*2ms
-#define AUTO_FRAME_TIMEOUT3  50  //10*2ms
+#define AUTO_FRAME_TIMEOUT1  50  //10*2ms
+#define AUTO_FRAME_TIMEOUT2  10  //10*2ms
+#define AUTO_FRAME_TIMEOUT3  10  //10*2ms
 /*自动成帧超时定时时间*/
 //响应超时时间，即上位机确认二维码正确后扫描枪一直扫描直到得到下一次数据的最长时间
 #define ANSWER_SCANTIME	 	 4000	  //4000*5ms
@@ -89,7 +89,11 @@ typedef enum{
 	SLAVE,
 	HOST
 }MCU_State_Type;
-
+typedef enum{
+	NO_USART_WORK,
+	USART2_WORK,
+	USART3_WORK,
+}USART_WORK_Type;
 typedef enum{
 	RESERVE,
 	READY,
@@ -135,8 +139,8 @@ typedef struct{
 	u8  frame_soh;
 	u8  frame_x;
 	u16 datasize;
+	u8  comm_ch;
 	u8  comm_state;
-	u8  bear;
 	u16 crc16_ccitt; 
 	u8  frame_end1;
 	u8  frame_end2;
@@ -192,10 +196,22 @@ typedef struct{
 	CH_Work_Type ch3;
 	CH_Work_Type ch4;
 }CH_Work;
+
+typedef struct{
+	u8 comm_head;
+	u8 comm_word;
+	u8 data_len;
+	u8 data[4];
+	u8 xorsum;
+}RFID_REC_Type; 
+
+
 /*************struct type end*******************/
 
 /*************extern variable start*******************/
 extern char Auto_Frame_Time1;
+extern char Auto_Frame_Time2;
+extern char Auto_Frame_Time3;
 
 extern  Usart_Type Usart1_Control_Data;
 extern Usart_Type Usart2_Control_Data;
@@ -213,6 +229,9 @@ extern  CH_Work Channel;
 extern	Belt_Work_Type belt11;
 extern	Belt_Work_Type belt12;
 extern u8 Key_ScanNum;
+extern RFID_REC_Type Usart2_RFIDRec;
+extern RFID_REC_Type Usart3_RFIDRec;
+
 /*************extern variable end*******************/
 
 /*************function start*******************/
