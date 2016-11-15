@@ -1,4 +1,4 @@
-#include "led.h"
+#include"HeadType.h"
 
 #define LED_LIGHT_TIMEOUT  100			//N*5MS
 u8 Gled_Num;

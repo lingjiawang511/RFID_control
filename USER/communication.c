@@ -382,6 +382,8 @@ u8 Execute_Host_Comm(void)
 											Usart1_Control_Data.rx_count = 0;
 											Auto_Frame_Time1 = AUTO_FRAME_TIMEOUT1;
 											Usart1_Control_Data.rx_aframe = 0;
+											Usart2_Control_Data.rx_aframe = 0;	//避免和PC通讯过程有人刷卡，通讯结束后直接响应开门
+											Usart3_Control_Data.rx_aframe = 0;
 											break;
 										}
 										PC_Answer.answer_numout--;
@@ -391,7 +393,10 @@ u8 Execute_Host_Comm(void)
 										Usart_Work_State = NO_USART_WORK;		//正确接收到PC机发送的接收状态信息，转化为从机等待下一次PC发送控制信息
 										PC_Answer.Nanswer_timeout = NANSWER_TIME;
 										PC_Answer.answer_numout = NANSWER_NUMOUT;
-																				//执行开锁点灯动作
+										Usart2_Control_Data.rx_aframe = 0;	//避免和PC通讯过程有人刷卡，通讯结束后直接响应开门
+										Usart3_Control_Data.rx_aframe = 0;
+										LOCK1_ON;										//执行开锁点灯动作,锁开好后再点灯
+										Lock1_State = 1;
 									}
 									Usart1_Control_Data.rx_count = 0;
 									Auto_Frame_Time1 = AUTO_FRAME_TIMEOUT1;
@@ -415,6 +420,8 @@ u8 Execute_Host_Comm(void)
 											Usart1_Control_Data.rx_count = 0;
 											Auto_Frame_Time1 = AUTO_FRAME_TIMEOUT1;
 											Usart1_Control_Data.rx_aframe = 0;
+											Usart2_Control_Data.rx_aframe = 0;	//避免和PC通讯过程有人刷卡，通讯结束后直接响应开门
+											Usart3_Control_Data.rx_aframe = 0;
 											break;
 										}
 										PC_Answer.answer_numout--;
@@ -424,7 +431,10 @@ u8 Execute_Host_Comm(void)
 										Usart_Work_State = NO_USART_WORK;		//正确接收到PC机发送的接收状态信息，转化为从机等待下一次PC发送控制信息
 										PC_Answer.Nanswer_timeout = NANSWER_TIME;
 										PC_Answer.answer_numout = NANSWER_NUMOUT;
-										//执行开锁点灯动作
+										Usart2_Control_Data.rx_aframe = 0;	//避免和PC通讯过程有人刷卡，通讯结束后直接响应开门
+										Usart3_Control_Data.rx_aframe = 0;
+										LOCK2_ON;	    	 //执行开锁点灯动作,锁开好后再点灯
+										Lock2_State = 1;
 									}
 									Usart1_Control_Data.rx_count = 0;
 									Auto_Frame_Time1 = AUTO_FRAME_TIMEOUT1;
@@ -453,7 +463,9 @@ void PC_Communication_Time_ISR(void )
 				Usart_Work_State = NO_USART_WORK;	
 				PC_Answer.Nanswer_timeout = NANSWER_TIME;
 				PC_Answer.answer_numout = NANSWER_NUMOUT;
-				PC_Answer.answer_state = 0;			
+				PC_Answer.answer_state = 0;	
+				Usart2_Control_Data.rx_aframe = 0;	//避免和PC通讯过程有人刷卡，通讯结束后直接响应开门
+				Usart3_Control_Data.rx_aframe = 0;			
 		}
 		if(PC_Answer.answer_numout > 0){
 				PC_Answer.answer_numout=PC_Answer.answer_numout;//自减操作不在这里

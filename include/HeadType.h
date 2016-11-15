@@ -10,7 +10,7 @@
 #include "usart.h"
 #include "TIM.h"
 #include "communication.h"
-
+#include "lock.h"
 
 /*************Typedef datatype start*******************/
 typedef char int8;
