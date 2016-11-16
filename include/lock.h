@@ -10,10 +10,10 @@
 #define		LOCK2_PORT				GPIOB
 #define   LOCK2_RCC					RCC_APB2Periph_GPIOB
 
-#define   LOCK1_OFF   			GPIO_SetBits(LOCK1_PORT, LOCK1_IO)
-#define   LOCK1_ON  				GPIO_ResetBits(LOCK1_PORT, LOCK1_IO)
-#define   LOCK2_OFF   			GPIO_SetBits(LOCK2_PORT, LOCK2_IO)
-#define   LOCK2_ON 	 				GPIO_ResetBits(LOCK2_PORT, LOCK2_IO)
+#define   LOCK1_OFF   			GPIO_ResetBits(LOCK1_PORT, LOCK1_IO)
+#define   LOCK1_ON  				GPIO_SetBits(LOCK1_PORT, LOCK1_IO)
+#define   LOCK2_OFF   			GPIO_ResetBits(LOCK2_PORT, LOCK2_IO)
+#define   LOCK2_ON 	 				GPIO_SetBits(LOCK2_PORT, LOCK2_IO)
 
 #define		LOCK1_CHECK_IO					GPIO_Pin_8
 #define		LOCK1_CHECK_PORT				GPIOB
@@ -55,12 +55,15 @@
 #define   LOCK2_LIGHT_OFF()   		{LOCK2_LIGHT1_OFF;LOCK2_LIGHT2_OFF;}	
 #define   LOCK2_LIGHT_ON() 	 			{LOCK2_LIGHT1_ON;LOCK2_LIGHT2_ON;}		
 
+#define   LOCK_TIME			400
 
 extern u8 Lock1_State;
 extern u8 Lock2_State;
+extern u16 lock1_time;
+extern u16 lock2_time;
 
 void LOCK_GPIO_Config(void);
-
+void Lock_control(void );
 
 
 

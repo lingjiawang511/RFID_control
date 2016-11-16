@@ -366,6 +366,8 @@ u8 Execute_Host_Comm(void)
 		if(res != 0){
 			res =Usrat3_Rec_RFIDdata();
 		}	
+//		Gled_Num = 0;
+//		GLED_OFF;
 		break;
 	case USART2_WORK:
 							if (1 == Usart1_Control_Data.rx_aframe){ 
@@ -397,6 +399,7 @@ u8 Execute_Host_Comm(void)
 										Usart3_Control_Data.rx_aframe = 0;
 										LOCK1_ON;										//执行开锁点灯动作,锁开好后再点灯
 										Lock1_State = 1;
+										lock1_time = LOCK_TIME;
 									}
 									Usart1_Control_Data.rx_count = 0;
 									Auto_Frame_Time1 = AUTO_FRAME_TIMEOUT1;
@@ -404,6 +407,7 @@ u8 Execute_Host_Comm(void)
 							}else{
 								res = 4;
 							}
+							GLED_ON;
 							break;
 	case USART3_WORK:							
 						if (1 == Usart1_Control_Data.rx_aframe){ 
@@ -435,6 +439,7 @@ u8 Execute_Host_Comm(void)
 										Usart3_Control_Data.rx_aframe = 0;
 										LOCK2_ON;	    	 //执行开锁点灯动作,锁开好后再点灯
 										Lock2_State = 1;
+										lock2_time = LOCK_TIME;
 									}
 									Usart1_Control_Data.rx_count = 0;
 									Auto_Frame_Time1 = AUTO_FRAME_TIMEOUT1;
@@ -442,6 +447,7 @@ u8 Execute_Host_Comm(void)
 							}else{
 								res = 4;
 							}
+							GLED_ON;
 							break;
 	}
 	return res;

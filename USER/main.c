@@ -30,15 +30,6 @@ int main(void)
 		delay_ms(100);
     while(1){
 			Execute_Host_Comm();
-			LOCK1_LIGHT_OFF();
-			LOCK1_OFF;
-			LOCK2_OFF;
-
-			delay_ms(1000);
-			LOCK1_ON;
-			LOCK2_ON;
-			LOCK1_LIGHT_ON();
-			delay_ms(1000);
 		}       
 }
 
