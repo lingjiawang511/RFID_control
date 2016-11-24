@@ -224,12 +224,14 @@ static u8 Usrat2_Rec_RFIDdata(void )
 		Usart1_Control_Data.tx_count = 0;	
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x01;
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x58;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x00;
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x05;
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x01;//卡的通道号
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart2_RFIDRec.data[0];
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart2_RFIDRec.data[1];
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart2_RFIDRec.data[2];
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart2_RFIDRec.data[3];	
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x00;
 		crc=CRC_GetCCITT(Usart1_Control_Data.txbuf,Usart1_Control_Data.tx_count);
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = (crc>>8)&0xFF; 
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = crc&0xFF;
@@ -279,12 +281,14 @@ static u8 Usrat3_Rec_RFIDdata(void )
 		Usart1_Control_Data.tx_count = 0;	
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x01;
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x58;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x00;
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x05;
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x02;//卡的通道号
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart3_RFIDRec.data[0];
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart3_RFIDRec.data[1];
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart3_RFIDRec.data[2];
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart3_RFIDRec.data[3];	
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x00;
 		crc=CRC_GetCCITT(Usart1_Control_Data.txbuf,Usart1_Control_Data.tx_count);
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = (crc>>8)&0xFF; 
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = crc&0xFF;
@@ -374,7 +378,7 @@ u8 Execute_Host_Comm(void)
 									res=Respond_Host_Comm();
 									if(( res== 1)||(res == 3)){//主机没有正确接收到数据，重新发送数据
 										Usart1_Control_Data.tx_index = 0;
-										Usart1_Control_Data.tx_count = 12;	
+										Usart1_Control_Data.tx_count = 14;	
 										PC_Answer.Nanswer_timeout = NANSWER_TIME;
 										if(PC_Answer.answer_numout == 0){
 											Usart_Work_State = NO_USART_WORK;	
@@ -414,7 +418,7 @@ u8 Execute_Host_Comm(void)
 									res=Respond_Host_Comm();
 									if(( res== 1)||(res == 3)){//主机没有正确接收到数据，重新发送数据
 										Usart1_Control_Data.tx_index = 0;
-										Usart1_Control_Data.tx_count = 12;	
+										Usart1_Control_Data.tx_count = 14;	
 										PC_Answer.Nanswer_timeout = NANSWER_TIME;
 										if(PC_Answer.answer_numout == 0){
 											Usart_Work_State = NO_USART_WORK;	
@@ -479,6 +483,8 @@ void PC_Communication_Time_ISR(void )
 				Usart_Work_State = NO_USART_WORK;	
 				PC_Answer.Nanswer_timeout = NANSWER_TIME;
 				PC_Answer.answer_numout = NANSWER_NUMOUT;
+				Usart2_Control_Data.rx_aframe = 0;	//避免和PC通讯过程有人刷卡，通讯结束后直接响应开门
+				Usart3_Control_Data.rx_aframe = 0;
 				PC_Answer.answer_state = 0;				
 		}
 	}
