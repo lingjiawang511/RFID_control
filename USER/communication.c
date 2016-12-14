@@ -367,11 +367,9 @@ u8 Execute_Host_Comm(void)
 	switch(Usart_Work_State){
 	case NO_USART_WORK:
 		res = Usrat2_Rec_RFIDdata();//有RFID信号时跳到相应的状态机等待PC接收数据后响应
-		if(res != 0){
-			res =Usrat3_Rec_RFIDdata();
-		}	
-//		Gled_Num = 0;
-//		GLED_OFF;
+//		if(res != 0){
+//			res =Usrat3_Rec_RFIDdata();
+//		}	
 		break;
 	case USART2_WORK:
 							if (1 == Usart1_Control_Data.rx_aframe){ 
@@ -413,7 +411,9 @@ u8 Execute_Host_Comm(void)
 							}
 							GLED_ON;
 							break;
-	case USART3_WORK:							
+
+	case USART3_WORK:		
+							#if 0		
 						if (1 == Usart1_Control_Data.rx_aframe){ 
 									res=Respond_Host_Comm();
 									if(( res== 1)||(res == 3)){//主机没有正确接收到数据，重新发送数据
@@ -452,7 +452,9 @@ u8 Execute_Host_Comm(void)
 								res = 4;
 							}
 							GLED_ON;
+							#endif
 							break;
+
 	}
 	return res;
 }

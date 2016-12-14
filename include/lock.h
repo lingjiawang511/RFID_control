@@ -9,58 +9,82 @@
 #define		LOCK2_IO					GPIO_Pin_13
 #define		LOCK2_PORT				GPIOB
 #define   LOCK2_RCC					RCC_APB2Periph_GPIOB
+#define		LOCK3_IO					GPIO_Pin_14
+#define		LOCK3_PORT				GPIOB
+#define   LOCK3_RCC					RCC_APB2Periph_GPIOB
+#define		LOCK4_IO					GPIO_Pin_15
+#define		LOCK4_PORT				GPIOB
+#define   LOCK4_RCC					RCC_APB2Periph_GPIOB
 
 #define   LOCK1_OFF   			GPIO_ResetBits(LOCK1_PORT, LOCK1_IO)
 #define   LOCK1_ON  				GPIO_SetBits(LOCK1_PORT, LOCK1_IO)
 #define   LOCK2_OFF   			GPIO_ResetBits(LOCK2_PORT, LOCK2_IO)
 #define   LOCK2_ON 	 				GPIO_SetBits(LOCK2_PORT, LOCK2_IO)
+#define   LOCK3_OFF   			GPIO_ResetBits(LOCK3_PORT, LOCK3_IO)
+#define   LOCK3_ON  				GPIO_SetBits(LOCK3_PORT, LOCK3_IO)
+#define   LOCK4_OFF   			GPIO_ResetBits(LOCK4_PORT, LOCK4_IO)
+#define   LOCK4_ON 	 				GPIO_SetBits(LOCK4_PORT, LOCK4_IO)
 
-#define		LOCK1_CHECK_IO					GPIO_Pin_8
+#define		LOCK1_CHECK_IO					GPIO_Pin_10
 #define		LOCK1_CHECK_PORT				GPIOB
 #define   LOCK1_CHECK_RCC					RCC_APB2Periph_GPIOB
-#define		LOCK2_CHECK_IO					GPIO_Pin_9
+#define		LOCK2_CHECK_IO					GPIO_Pin_11
 #define		LOCK2_CHECK_PORT				GPIOB
 #define   LOCK2_CHECK_RCC					RCC_APB2Periph_GPIOB
+#define		LOCK3_CHECK_IO					GPIO_Pin_8
+#define		LOCK3_CHECK_PORT				GPIOB
+#define   LOCK3_CHECK_RCC					RCC_APB2Periph_GPIOB
+#define		LOCK4_CHECK_IO					GPIO_Pin_9
+#define		LOCK4_CHECK_PORT				GPIOB
+#define   LOCK4_CHECK_RCC					RCC_APB2Periph_GPIOB
 
 #define   READ_LOCK1_CHECK   			GPIO_ReadInputDataBit(LOCK1_CHECK_PORT,LOCK1_CHECK_IO)
 #define   READ_LOCK2_CHECK  			GPIO_ReadInputDataBit(LOCK2_CHECK_PORT,LOCK2_CHECK_IO)
+#define   READ_LOCK3_CHECK   			GPIO_ReadInputDataBit(LOCK3_CHECK_PORT,LOCK3_CHECK_IO)
+#define   READ_LOCK4_CHECK  			GPIO_ReadInputDataBit(LOCK4_CHECK_PORT,LOCK4_CHECK_IO)
 
-#define		LOCK1_LIGHT1_IO					GPIO_Pin_5
+#define		LOCK1_LIGHT1_IO					GPIO_Pin_4
 #define		LOCK1_LIGHT1_PORT				GPIOA
 #define   LOCK1_LIGHT1_RCC				RCC_APB2Periph_GPIOA
-#define		LOCK1_LIGHT2_IO					GPIO_Pin_7
+//LIGHT2 当作灯的亮度调节，暂时不修改名称
+#define		LOCK1_LIGHT2_IO					GPIO_Pin_5
 #define		LOCK1_LIGHT2_PORT				GPIOA
 #define   LOCK1_LIGHT2_RCC				RCC_APB2Periph_GPIOA
 
-#define		LOCK2_LIGHT1_IO					GPIO_Pin_4
-#define		LOCK2_LIGHT1_PORT				GPIOA
-#define   LOCK2_LIGHT1_RCC				RCC_APB2Periph_GPIOA
-#define		LOCK2_LIGHT2_IO					GPIO_Pin_6
-#define		LOCK2_LIGHT2_PORT				GPIOA
-#define   LOCK2_LIGHT2_RCC				RCC_APB2Periph_GPIOA
+//#define		LOCK2_LIGHT1_IO					GPIO_Pin_4
+//#define		LOCK2_LIGHT1_PORT				GPIOA
+//#define   LOCK2_LIGHT1_RCC				RCC_APB2Periph_GPIOA
+//#define		LOCK2_LIGHT2_IO					GPIO_Pin_6
+//#define		LOCK2_LIGHT2_PORT				GPIOA
+//#define   LOCK2_LIGHT2_RCC				RCC_APB2Periph_GPIOA
 
 #define   LOCK1_LIGHT1_OFF   			GPIO_ResetBits(LOCK1_LIGHT1_PORT, LOCK1_LIGHT1_IO)
 #define   LOCK1_LIGHT1_ON  				GPIO_SetBits(LOCK1_LIGHT1_PORT, LOCK1_LIGHT1_IO)
 #define   LOCK1_LIGHT2_OFF   			GPIO_ResetBits(LOCK1_LIGHT2_PORT, LOCK1_LIGHT2_IO)
 #define   LOCK1_LIGHT2_ON  				GPIO_SetBits(LOCK1_LIGHT2_PORT, LOCK1_LIGHT2_IO)
 
-#define   LOCK2_LIGHT1_OFF   			GPIO_ResetBits(LOCK2_LIGHT1_PORT, LOCK2_LIGHT1_IO)
-#define   LOCK2_LIGHT1_ON  				GPIO_SetBits(LOCK2_LIGHT1_PORT, LOCK2_LIGHT1_IO)
-#define   LOCK2_LIGHT2_OFF   			GPIO_ResetBits(LOCK2_LIGHT2_PORT, LOCK2_LIGHT2_IO)
-#define   LOCK2_LIGHT2_ON  				GPIO_SetBits(LOCK2_LIGHT2_PORT, LOCK2_LIGHT2_IO)
+//#define   LOCK2_LIGHT1_OFF   			GPIO_ResetBits(LOCK2_LIGHT1_PORT, LOCK2_LIGHT1_IO)
+//#define   LOCK2_LIGHT1_ON  				GPIO_SetBits(LOCK2_LIGHT1_PORT, LOCK2_LIGHT1_IO)
+//#define   LOCK2_LIGHT2_OFF   			GPIO_ResetBits(LOCK2_LIGHT2_PORT, LOCK2_LIGHT2_IO)
+//#define   LOCK2_LIGHT2_ON  				GPIO_SetBits(LOCK2_LIGHT2_PORT, LOCK2_LIGHT2_IO)
 
 
 #define   LOCK1_LIGHT_OFF()   		{LOCK1_LIGHT1_OFF;LOCK1_LIGHT2_OFF;}
-#define   LOCK1_LIGHT_ON()  			{LOCK1_LIGHT1_ON;LOCK1_LIGHT2_ON;}	
-#define   LOCK2_LIGHT_OFF()   		{LOCK2_LIGHT1_OFF;LOCK2_LIGHT2_OFF;}	
-#define   LOCK2_LIGHT_ON() 	 			{LOCK2_LIGHT1_ON;LOCK2_LIGHT2_ON;}		
+#define   LOCK1_LIGHT_ON_H()  		{LOCK1_LIGHT1_ON;LOCK1_LIGHT2_OFF;}	
+#define   LOCK1_LIGHT_ON_L()  		{LOCK1_LIGHT1_ON;LOCK1_LIGHT2_ON;}
+//#define   LOCK2_LIGHT_OFF()   		{LOCK2_LIGHT1_OFF;LOCK2_LIGHT2_OFF;}	
+//#define   LOCK2_LIGHT_ON() 	 			{LOCK2_LIGHT1_ON;LOCK2_LIGHT2_ON;}		
 
 #define   LOCK_TIME			400
 
 extern u8 Lock1_State;
 extern u8 Lock2_State;
+extern u8 Lock3_State;
+extern u8 Lock4_State;
 extern u16 lock1_time;
 extern u16 lock2_time;
+extern u16 lock3_time;
+extern u16 lock4_time;
 
 void LOCK_GPIO_Config(void);
 void Lock_control(void );
