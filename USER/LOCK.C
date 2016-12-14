@@ -10,9 +10,11 @@ u16 lock1_time;
 u16 lock2_time;
 u16 lock3_time;
 u16 lock4_time;
+
+u8 Check_State;
 //=============================================================================
-//函数名称: LED_GPIO_Config
-//功能概要:LED灯引脚配置
+//函数名称: LOCK_GPIO_Config
+//功能概要:LOCK灯引脚配置
 //参数名称:无
 //函数返回:无
 //注意    :无
@@ -114,7 +116,7 @@ static void Lock_control_12(void )
 	 static u16 lock2_timercount;
 	 //LOCK1
 	 if(Lock1_State == 1){	
-			if(READ_LOCK1_CHECK == READLOW){
+			if(READ_LOCK1_CHECK == READLOW){   //锁是关的，才打开，不然没有意义
 				if(lock1_triggerstate == 0){
 					lock1_triggerstate = 1;
 				}else{
@@ -185,7 +187,7 @@ static void Lock_control_12(void )
 				lock2_timercount = 0;
 	 }
 	 
-	 if(Lock1_State > 0){
+	 if(Lock1_State > 0){   //最长开锁时间，如果锁是开的，上位机让MCU开锁，超时后状态复位
 			 lock1_time--;
 			 if(lock1_time <= 0){
 				 LOCK1_OFF;

@@ -86,6 +86,8 @@ extern u16 lock2_time;
 extern u16 lock3_time;
 extern u16 lock4_time;
 
+extern u8 Check_State;
+
 void LOCK_GPIO_Config(void);
 void Lock_control(void );
 

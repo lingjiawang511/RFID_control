@@ -11,6 +11,8 @@
 #include "TIM.h"
 #include "communication.h"
 #include "lock.h"
+#include "beep.h"
+#include "sensor.h"
 
 /*************Typedef datatype start*******************/
 typedef char int8;
@@ -120,16 +122,22 @@ typedef struct{
 	u8  frame_soh;
 	u8  frame_x;
 	u16 datasize;
-	u8  ch1_state;
-	u8  ch1_num;
-	u8  ch2_state;
-	u8  ch2_num;
-	u8  ch3_state;
-	u8  ch3_num;
-	u8  ch4_state;
-	u8  ch4_num;
-	u8  belt_state;
-	u8  belt_time;
+	u8  RFID_state;
+	u8  RFID_num1;
+	u8  RFID_num2;
+	u8  RFID_num3;
+	u8  RFID_num4;
+	u8  lock1_state;
+	u8  lock2_state;
+	u8  lock3_state;
+	u8  lock4_state;
+	u8  sensor_state;
+	u8  sensor1_state;
+	u8  sensor2_state;
+	u8  sensor3_state;
+	u8  sensor4_state;
+	u8  sensor5_state;
+	u8  sensor6_state;
 	u16 crc16_ccitt; 
 	u8  frame_end1;
 	u8  frame_end2;
@@ -139,8 +147,12 @@ typedef struct{
 	u8  frame_soh;
 	u8  frame_x;
 	u16 datasize;
-	u8  comm_ch;
-	u8  comm_state;
+	u8  lock1;
+	u8  lock2;
+	u8  lock3;
+	u8  lock4;
+	u8  RFID;
+	u8  check;
 	u16 crc16_ccitt; 
 	u8  frame_end1;
 	u8  frame_end2;
@@ -148,12 +160,12 @@ typedef struct{
 
 typedef union{
 	Communation_Send_Type control;
-	u8	send_buf[18];	
+	u8	send_buf[24];	
 }COMM_Send_Union_Type;
 
 typedef union{
 	Communation_Rec_Type control;
-	u8	rec_buf[10];	
+	u8	rec_buf[14];	
 }COMM_Rec_Union_Type;
 
 typedef struct{
@@ -217,7 +229,7 @@ extern  Usart_Type Usart1_Control_Data;
 extern Usart_Type Usart2_Control_Data;
 extern Usart_Type Usart3_Control_Data;
 extern  COMM_Send_Union_Type PC_Host_Rec;
-extern  COMM_Rec_Union_Type  PC_Hosr_Send;
+extern  COMM_Rec_Union_Type  PC_Host_Send;
 
 extern  COMM_Send_Union_Type MCU_Host_Send;
 extern  COMM_Rec_Union_Type  MCU_Host_Rec;

@@ -149,6 +149,7 @@ void TIM2_IRQHandler(void)
 	if ( TIM_GetITStatus(TIM2 , TIM_IT_Update) != RESET ) 
 	{	
 		Led_Flash();
+		Beep_Response();
 		Lock_control();
 //		key=Key_Scan();
 		if(key >0){
