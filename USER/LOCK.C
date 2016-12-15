@@ -102,7 +102,7 @@ void LOCK_GPIO_Config(void)
 	Lock.lock2.lock_check_state = 0;
 	Lock.lock3.lock_check_state = 0;
 	Lock.lock4.lock_check_state = 0;
-	
+	Check_State =0 ;
 }
 
 //锁的控制和检测分开，因为所的控制需要控制灯，并且人工关锁的时候要自动关灯，但是锁的状态改变需要上传给PC
@@ -295,7 +295,13 @@ static void Lock_control_34(void )
 			}
 	}
 }
-
+//=============================================================================
+//函数名称: Lock_check
+//功能概要:锁状态检查函数
+//参数名称:无
+//函数返回:无
+//注意    :无
+//=============================================================================
 static void Lock_check(void )
 {
 	static u8 old_lock1_state,old_lock2_state,old_lock3_state,old_lock4_state;
@@ -358,6 +364,11 @@ static void Lock_check(void )
 					lock4_state_count = 0;
 			}
 	}	
+	if(Check_State == 0){
+		if((Lock.lock1.lock_check_state ==1)||(Lock.lock2.lock_check_state ==1)||(Lock.lock2.lock_check_state ==1)||(Lock.lock4.lock_check_state ==1)){
+				Check_State = 1;				
+		}
+	}
 }
 //必须在定时器中调用此函数
 void Lock_control(void )
@@ -369,7 +380,6 @@ void Lock_control(void )
 	}else{//四个锁都是关的状态，自动关灯
 		LOCK1_LIGHT_OFF();//关灯
 	}
-	
 	Lock_check();
 }
 
