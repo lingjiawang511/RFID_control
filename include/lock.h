@@ -77,14 +77,23 @@
 
 #define   LOCK_TIME			400
 
-extern u8 Lock1_State;
-extern u8 Lock2_State;
-extern u8 Lock3_State;
-extern u8 Lock4_State;
-extern u16 lock1_time;
-extern u16 lock2_time;
-extern u16 lock3_time;
-extern u16 lock4_time;
+typedef struct{
+	u8 lock_state;
+	u16 lock_time;
+	u8 lock_check_state;
+	u8 lock_check_value;
+}Lock_Control_Type;
+
+typedef struct{
+	Lock_Control_Type lock1;
+	Lock_Control_Type lock2;
+	Lock_Control_Type lock3;
+	Lock_Control_Type lock4;
+}Lock_Type;
+
+
+
+extern Lock_Type Lock;
 
 extern u8 Check_State;
 

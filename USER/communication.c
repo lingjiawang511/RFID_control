@@ -349,8 +349,8 @@ u8 Respond_Host_Comm(void)
 						case 0x00: break;    //不处理
 						case 0x01: 					
 					        	LOCK1_ON;										//执行开锁点灯动作,锁开好后再点灯
-										Lock1_State = 1;
-										lock1_time = LOCK_TIME;
+										Lock.lock1.lock_state = 1;
+										Lock.lock1.lock_time = LOCK_TIME;
 					        	break;   //开锁1
 						default :break;
 					}
@@ -358,8 +358,8 @@ u8 Respond_Host_Comm(void)
 						case 0x00: break;    //不处理
 						case 0x01:
 					        	LOCK2_ON;										//执行开锁点灯动作,锁开好后再点灯
-										Lock2_State = 1;
-										lock2_time = LOCK_TIME;
+										Lock.lock2.lock_state = 1;
+										Lock.lock2.lock_time = LOCK_TIME;
 					        	break;   //开锁1
 						default :break;
 					}
@@ -367,8 +367,8 @@ u8 Respond_Host_Comm(void)
 						case 0x00: break;    //不处理
 						case 0x01: 
 					        	LOCK3_ON;										//执行开锁点灯动作,锁开好后再点灯
-										Lock3_State = 1;
-										lock3_time = LOCK_TIME;
+										Lock.lock3.lock_state = 1;
+										Lock.lock3.lock_time = LOCK_TIME;
 					        	break;   //开锁1
 						default :break;
 					}
@@ -376,8 +376,8 @@ u8 Respond_Host_Comm(void)
 						case 0x00: break;    //不处理
 						case 0x01:
 					        	LOCK4_ON;										//执行开锁点灯动作,锁开好后再点灯
-										Lock4_State = 1;
-										lock4_time = LOCK_TIME;
+										Lock.lock4.lock_state = 1;
+										Lock.lock4.lock_time = LOCK_TIME;
 					        	break;   //开锁1
 						default :break;
 					}
