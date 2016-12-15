@@ -1,7 +1,7 @@
 #include"HeadType.h"
 
 #define SENSOR_COUNT    4			//锁检查滤波次数，在定时器调用就相当于滤波时间
-#define SENSOR_TIME     100		//100*5ms,传感器在触发一次后，需要等这段时间才可以再触发
+#define SENSOR_TIME     200		//200*5ms,传感器在触发一次后，需要等这段时间才可以再触发
 u8 Sensor_State;
 Sensor_Type Sonser;
 
@@ -71,28 +71,22 @@ void SENSOR_GPIO_Config(void)
 //=============================================================================
 static void Sensor_Time_Control(void)
 {
-	if(Sonser.sensor1.sensor_time > 0)
-	{
+	if(Sonser.sensor1.sensor_time > 0){
 		Sonser.sensor1.sensor_time--;
 	}
-	if(Sonser.sensor2.sensor_time > 0)
-	{
+	if(Sonser.sensor2.sensor_time > 0){
 		Sonser.sensor2.sensor_time--;
 	}
-	if(Sonser.sensor3.sensor_time > 0)
-	{
+	if(Sonser.sensor3.sensor_time > 0){
 		Sonser.sensor3.sensor_time--;
 	}
-	if(Sonser.sensor4.sensor_time > 0)
-	{
+	if(Sonser.sensor4.sensor_time > 0){
 		Sonser.sensor4.sensor_time--;
 	}
-	if(Sonser.sensor5.sensor_time > 0)
-	{
+	if(Sonser.sensor5.sensor_time > 0){
 		Sonser.sensor5.sensor_time--;
 	}
-	if(Sonser.sensor6.sensor_time > 0)
-	{
+	if(Sonser.sensor6.sensor_time > 0){
 		Sonser.sensor6.sensor_time--;
 	}
 }

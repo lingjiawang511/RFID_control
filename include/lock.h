@@ -97,8 +97,8 @@ typedef struct{
 
 
 extern Lock_Type Lock;
-
 extern u8 Check_State;
+extern u8 Lock_Check_state;
 
 void LOCK_GPIO_Config(void);
 void Lock_control(void );

@@ -3,22 +3,22 @@
 
 #include "stm32f10x.h"
 
-#define		SENSOR1_IO					GPIO_Pin_12
-#define		SENSOR1_PORT				GPIOB
-#define   SENSOR1_RCC					RCC_APB2Periph_GPIOB
-#define		SENSOR2_IO					GPIO_Pin_13
-#define		SENSOR2_PORT				GPIOB
-#define   SENSOR2_RCC					RCC_APB2Periph_GPIOB
-#define		SENSOR3_IO					GPIO_Pin_14
+#define		SENSOR1_IO					GPIO_Pin_11
+#define		SENSOR1_PORT				GPIOA
+#define   SENSOR1_RCC					RCC_APB2Periph_GPIOA
+#define		SENSOR2_IO					GPIO_Pin_12
+#define		SENSOR2_PORT				GPIOA
+#define   SENSOR2_RCC					RCC_APB2Periph_GPIOA
+#define		SENSOR3_IO					GPIO_Pin_7
 #define		SENSOR3_PORT				GPIOB
 #define   SENSOR3_RCC					RCC_APB2Periph_GPIOB
-#define		SENSOR4_IO					GPIO_Pin_15
+#define		SENSOR4_IO					GPIO_Pin_6
 #define		SENSOR4_PORT				GPIOB
 #define   SENSOR4_RCC					RCC_APB2Periph_GPIOB
-#define		SENSOR5_IO					GPIO_Pin_14
+#define		SENSOR5_IO					GPIO_Pin_5
 #define		SENSOR5_PORT				GPIOB
 #define   SENSOR5_RCC					RCC_APB2Periph_GPIOB
-#define		SENSOR6_IO					GPIO_Pin_15
+#define		SENSOR6_IO					GPIO_Pin_0
 #define		SENSOR6_PORT				GPIOB
 #define   SENSOR6_RCC					RCC_APB2Periph_GPIOB
 

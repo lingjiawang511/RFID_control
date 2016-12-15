@@ -18,7 +18,7 @@ int main(void)
 		delay_init();
 		LOCK_GPIO_Config();
 	  BEEP_GPIO_Config();
-	 // SENSOR_GPIO_Config();
+	  SENSOR_GPIO_Config();
 		USART1_Config();
 		USART2_Config();
 //		USART3_Config();

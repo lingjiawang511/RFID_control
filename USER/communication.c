@@ -257,8 +257,9 @@ static u8 Usrat2_Rec_RFIDdata(void )
 		USART_SendData(USART1,Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++]);
 //		Usart_Work_State = USART2_WORK; //谁先接收到数据谁先传输
 		Usart2_Control_Data.rx_aframe = 0;
-//		Usart1_Control_Data.rx_aframe = 0;	//清空和主机的通讯，避免通讯错误
-//		Usart1_Control_Data.rx_count = 0;
+		for(i=0;i<4;i++){
+			Usart2_RFIDRec.data[i] = 0;
+		}
 		res = 0;
 	}else{
 		res = 1;
@@ -412,8 +413,6 @@ u8 Respond_Host_Comm(void)
 u8 Execute_Host_Comm(void)
 {
 	u8 res;
-	switch(Usart_Work_State){
-	case NO_USART_WORK:
 		res = Usrat2_Rec_RFIDdata();//有RFID信号时跳到相应的状态机等待PC接收数据后响应
 		if (1 == Usart1_Control_Data.rx_aframe){ 
 				res=Respond_Host_Comm();   //不做闭环响应，所以每次res都是等于0
@@ -421,63 +420,6 @@ u8 Execute_Host_Comm(void)
 				Auto_Frame_Time1 = AUTO_FRAME_TIMEOUT1;
 				Usart1_Control_Data.rx_aframe = 0;
 		}
-		break;
-	case USART2_WORK:
-							if (1 == Usart1_Control_Data.rx_aframe){ 
-									res=Respond_Host_Comm();   //不做闭环响应，所以每次res都是等于0
-									Usart1_Control_Data.rx_count = 0;
-									Auto_Frame_Time1 = AUTO_FRAME_TIMEOUT1;
-									Usart1_Control_Data.rx_aframe = 0;
-							}else{
-								res = 4;
-							}
-							GLED_ON;
-							break;
-
-	case USART3_WORK:		
-							#if 0		
-						if (1 == Usart1_Control_Data.rx_aframe){ 
-									res=Respond_Host_Comm();
-									if(( res== 1)||(res == 3)){//主机没有正确接收到数据，重新发送数据
-										Usart1_Control_Data.tx_index = 0;
-										Usart1_Control_Data.tx_count = 14;	
-										PC_Answer.Nanswer_timeout = NANSWER_TIME;
-										if(PC_Answer.answer_numout == 0){
-											Usart_Work_State = NO_USART_WORK;	
-											PC_Answer.Nanswer_timeout = NANSWER_TIME;
-											PC_Answer.answer_numout = NANSWER_NUMOUT;
-											PC_Answer.answer_state = 0;			
-											Usart1_Control_Data.rx_count = 0;
-											Auto_Frame_Time1 = AUTO_FRAME_TIMEOUT1;
-											Usart1_Control_Data.rx_aframe = 0;
-											Usart2_Control_Data.rx_aframe = 0;	//避免和PC通讯过程有人刷卡，通讯结束后直接响应开门
-											Usart3_Control_Data.rx_aframe = 0;
-											break;
-										}
-										PC_Answer.answer_numout--;
-										USART_SendData(USART1,Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++]);//原来的数据没改变，所以直接发送
-									}else if(res == 0){
-										PC_Answer.answer_state = 0;	
-										Usart_Work_State = NO_USART_WORK;		//正确接收到PC机发送的接收状态信息，转化为从机等待下一次PC发送控制信息
-										PC_Answer.Nanswer_timeout = NANSWER_TIME;
-										PC_Answer.answer_numout = NANSWER_NUMOUT;
-										Usart2_Control_Data.rx_aframe = 0;	//避免和PC通讯过程有人刷卡，通讯结束后直接响应开门
-										Usart3_Control_Data.rx_aframe = 0;
-										LOCK2_ON;	    	 //执行开锁点灯动作,锁开好后再点灯
-										Lock2_State = 1;
-										lock2_time = LOCK_TIME;
-									}
-									Usart1_Control_Data.rx_count = 0;
-									Auto_Frame_Time1 = AUTO_FRAME_TIMEOUT1;
-									Usart1_Control_Data.rx_aframe = 0;
-							}else{
-								res = 4;
-							}
-							GLED_ON;
-							#endif
-							break;
-
-	}
 	return res;
 }
 
@@ -519,7 +461,7 @@ void Comm_Upload_state(void)
 {
 	u16 crc;   
 	
-	if((Check_State ==1)||(Sensor_State ==1)){	
+	if((Lock_Check_state ==1)||(Check_State ==1)||(Sensor_State ==1)){	
 		while(Usart1_Control_Data.tx_count != 0);		//上一次数据必须传输完成才可以下一次传输
 		Usart1_Control_Data.tx_count = 0;	
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x01;
@@ -559,6 +501,7 @@ void Comm_Upload_state(void)
 		RESET_SENSOR_CHECK_VALUE;
 		Check_State = 0;
 		Sensor_State = 0;
+		Lock_Check_state = 0;
 		
 	}
 
