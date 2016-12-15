@@ -5,6 +5,7 @@
 #define LOCK_STATE_COUNT    3			//锁检查滤波次数，在定时器调用就相当于滤波时间
 
 u8 Check_State;
+u8 Lock_Check_state;
 Lock_Type Lock;
 //=============================================================================
 //函数名称: LOCK_GPIO_Config
@@ -364,9 +365,9 @@ static void Lock_check(void )
 					lock4_state_count = 0;
 			}
 	}	
-	if(Check_State == 0){
+	if(Lock_Check_state == 0){
 		if((Lock.lock1.lock_check_state ==1)||(Lock.lock2.lock_check_state ==1)||(Lock.lock2.lock_check_state ==1)||(Lock.lock4.lock_check_state ==1)){
-				Check_State = 1;				
+				Lock_Check_state = 1;				
 		}
 	}
 }
