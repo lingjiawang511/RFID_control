@@ -232,10 +232,10 @@ static u8 Usrat2_Rec_RFIDdata(void )
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart2_RFIDRec.data[1];
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart2_RFIDRec.data[2];
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart2_RFIDRec.data[3];	
-		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = READ_LOCK1_CHECK;
-		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = READ_LOCK2_CHECK;
-		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = READ_LOCK3_CHECK;
-		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = READ_LOCK4_CHECK;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Lock.lock1.lock_check_value;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Lock.lock2.lock_check_value;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Lock.lock3.lock_check_value;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Lock.lock4.lock_check_value;
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x00;
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x00;
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x00;
@@ -290,6 +290,7 @@ static u8 Usrat3_Rec_RFIDdata(void )
 		for(i=0;i<4;i++){
 			Usart3_RFIDRec.data[i] = Usart3_Control_Data.rxbuf[i+3];
 		}
+		while(Usart1_Control_Data.tx_count != 0); //上一次数据必须传输完成才可以下一次传输
 		Usart1_Control_Data.tx_count = 0;	
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x01;
 		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x58;
@@ -514,7 +515,54 @@ void PC_Communication_Time_ISR(void )
 }
 
 
+void Comm_Upload_state(void)
+{
+	u16 crc;   
+	
+	if((Check_State ==1)||(Sensor_State ==1)){	
+		while(Usart1_Control_Data.tx_count != 0);		//上一次数据必须传输完成才可以下一次传输
+		Usart1_Control_Data.tx_count = 0;	
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x01;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x58;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x00;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x10;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x00;//有无RFID读卡
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart2_RFIDRec.data[0];	//需要清零
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart2_RFIDRec.data[1];
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart2_RFIDRec.data[2];
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart2_RFIDRec.data[3];	
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Lock.lock1.lock_check_value;  //不允许请零
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Lock.lock2.lock_check_value;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Lock.lock3.lock_check_value;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Lock.lock4.lock_check_value;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Sensor_State;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Sonser.sensor1.sensor_check_value;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Sonser.sensor2.sensor_check_value;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Sonser.sensor3.sensor_check_value;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Sonser.sensor4.sensor_check_value;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Sonser.sensor5.sensor_check_value;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Sonser.sensor6.sensor_check_value;
+		crc=CRC_GetCCITT(Usart1_Control_Data.txbuf,Usart1_Control_Data.tx_count);
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = (crc>>8)&0xFF; 
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = crc&0xFF;
+		
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0X0D;
+		Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0X0A;
+		
+		PC_Answer.Nanswer_timeout = NANSWER_TIME;
+		PC_Answer.answer_numout = NANSWER_NUMOUT;
+		PC_Answer.answer_state = 1;
+		Usart1_Control_Data.tx_index = 0;	
+		USART_SendData(USART1,Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++]);	
+		
+		RESET_LOCK_CHECK_STATE;
+		RESET_SENSOR_CHECK_VALUE;
+		Check_State = 0;
+		Sensor_State = 0;
+		
+	}
 
+}
 
 
 

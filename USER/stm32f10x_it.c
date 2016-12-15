@@ -151,6 +151,7 @@ void TIM2_IRQHandler(void)
 		Led_Flash();
 		Beep_Response();
 		Lock_control();
+		Sensor_check();
 //		key=Key_Scan();
 		if(key >0){
 			Key_ScanNum = key;

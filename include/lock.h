@@ -76,6 +76,9 @@
 //#define   LOCK2_LIGHT_ON() 	 			{LOCK2_LIGHT1_ON;LOCK2_LIGHT2_ON;}		
 
 #define   LOCK_TIME			400
+#define   RESET_LOCK_CHECK_STATE  do{Lock.lock1.lock_check_state =0;Lock.lock2.lock_check_state =0;\
+																		Lock.lock3.lock_check_state =0;Lock.lock4.lock_check_state =0;}while(0);
+
 
 typedef struct{
 	u8 lock_state;

@@ -30,9 +30,32 @@
 #define   READ_SENSOR5_CHECK   			GPIO_ReadInputDataBit(SENSOR5_PORT,SENSOR5_IO)
 #define   READ_SENSOR6_CHECK  			GPIO_ReadInputDataBit(SENSOR6_PORT,SENSOR6_IO)
 
+#define   RESET_SENSOR_CHECK_VALUE  do{Sonser.sensor1.sensor_check_value = 0;Sonser.sensor2.sensor_check_value = 0;\
+																			Sonser.sensor3.sensor_check_value = 0;Sonser.sensor4.sensor_check_value = 0;\
+																			Sonser.sensor5.sensor_check_value = 0;Sonser.sensor6.sensor_check_value = 0;}while(0);
+
+
+typedef struct{
+	u8 sensor_state;
+	u8 sensor_check_value;
+	u16 sensor_time;
+}Sensor_Control_Type;
+
+typedef struct{
+	Sensor_Control_Type sensor1;
+	Sensor_Control_Type sensor2;
+	Sensor_Control_Type sensor3;
+	Sensor_Control_Type sensor4;
+	Sensor_Control_Type sensor5;
+	Sensor_Control_Type sensor6;
+}Sensor_Type;
+
+
+extern u8 Sensor_State;
+extern Sensor_Type Sonser;
 
 void SENSOR_GPIO_Config(void);
-
+void Sensor_check(void );
 
 
 

@@ -450,6 +450,7 @@ void USART3_Do_Tx(void )
 //=============================================================================
 void USART1_Do_Rx(u8 rxdata)
 {       
+		static u8 old_frame_end1,old_frame_end2;
     if (0 == Usart1_Control_Data.rx_aframe){
        if (0 == Usart1_Control_Data.rx_index){  //接收第一帧的第一个数据开启定时器3做时间自动成帧处理
            Usart1_Control_Data.rx_start = 1;
@@ -465,7 +466,18 @@ void USART1_Do_Rx(u8 rxdata)
         }
 				Auto_Frame_Time1 = AUTO_FRAME_TIMEOUT1;
        	Usart1_Control_Data.rxbuf[Usart1_Control_Data.rx_index] = rxdata;
-        Usart1_Control_Data.rx_index++;
+				Usart1_Control_Data.rx_index++;	
+				if(Usart1_Control_Data.rx_index >= 2){		//接受数据帧尾成帧
+					old_frame_end1 = Usart1_Control_Data.rxbuf[Usart1_Control_Data.rx_index - 2];
+					old_frame_end2 = Usart1_Control_Data.rxbuf[Usart1_Control_Data.rx_index - 1];
+					if((old_frame_end1 == 0x0D)&&(old_frame_end2 == 0X0A)){
+							Usart1_Control_Data.rx_aframe = 1;  //接收数据长度自动成帧
+							Usart1_Control_Data.rx_count = Usart1_Control_Data.rx_index;
+						  Usart1_Control_Data.rx_index = 0;   //得到一帧数据后及时把索引清零
+							Usart1_Control_Data.rx_start = 0;
+							Auto_Frame_Time1 = AUTO_FRAME_TIMEOUT1; 
+					}
+				}
         if (Usart1_Control_Data.rx_index > (RxBufMax - 1)){
             Usart1_Control_Data.rx_index = (RxBufMax - 1);
             Usart1_Control_Data.rx_aframe = 1;  //接收数据长度自动成帧
