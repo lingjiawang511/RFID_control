@@ -21,11 +21,9 @@ int main(void)
 	  SENSOR_GPIO_Config();
 		USART1_Config();
 		USART2_Config();
-//		USART3_Config();
 		LED_GPIO_Config();
-		KEY_GPIO_Config();
-		USART2_Puts("123456");
-		USART2_Puts("123456");
+//		USART2_Puts("123456");
+//		USART2_Puts("123456");
     TIM2_Config();
     TIM3_Config();
 		delay_ms(100);

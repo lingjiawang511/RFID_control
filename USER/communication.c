@@ -6,9 +6,9 @@ unsigned char static ComSet[]={0x03, COMM_CONTROL_ANTENNA, 0x03};
  //设置打开天线和关闭自动循卡
 unsigned char static ComSearchCard[]={0x03,COMM_MIFARE_SEARCH_CARD, 0x00};
 //寻卡后读出卡号
-unsigned char static cReadBlock[]={0x0A,COMM_READ_BLOCK, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+//unsigned char static cReadBlock[]={0x0A,COMM_READ_BLOCK, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 //读块No.3第1扇区的密码和控制字
-unsigned char static ComReadBlock3[]={0x0A,COMM_READ_BLOCK,0x00, 0x03, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+//unsigned char static ComReadBlock3[]={0x0A,COMM_READ_BLOCK,0x00, 0x03, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 //读块No.1
 unsigned char static ComReadBlock1[]={0x0A,COMM_READ_BLOCK,0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 //写块No.1
@@ -266,6 +266,7 @@ static u8 Usrat2_Rec_RFIDdata(void )
 	}
 	return res;
 }
+#if 0
 //=============================================================================
 //函数名称:Usrat2_Rec_RFIDdata
 //功能概要:串口2接收到的RFID数据
@@ -325,7 +326,7 @@ static u8 Usrat3_Rec_RFIDdata(void )
 	return res;
 }
 
-
+#endif
 //=============================================================================
 //函数名称:Respond_Host_Comm
 //功能概要:响应上位机的发出的数据命令，数据已经从串口一接收完整
@@ -362,7 +363,7 @@ u8 Respond_Host_Comm(void)
 					        	LOCK2_ON;										//执行开锁点灯动作,锁开好后再点灯
 										Lock.lock2.lock_state = 1;
 										Lock.lock2.lock_time = LOCK_TIME;
-					        	break;   //开锁1
+					        	break;   //开锁2
 						default :break;
 					}
 					switch(MCU_Host_Rec.control.lock3){
@@ -371,7 +372,7 @@ u8 Respond_Host_Comm(void)
 					        	LOCK3_ON;										//执行开锁点灯动作,锁开好后再点灯
 										Lock.lock3.lock_state = 1;
 										Lock.lock3.lock_time = LOCK_TIME;
-					        	break;   //开锁1
+					        	break;   //开锁3
 						default :break;
 					}
 					switch(MCU_Host_Rec.control.lock4){
@@ -380,12 +381,13 @@ u8 Respond_Host_Comm(void)
 					        	LOCK4_ON;										//执行开锁点灯动作,锁开好后再点灯
 										Lock.lock4.lock_state = 1;
 										Lock.lock4.lock_time = LOCK_TIME;
-					        	break;   //开锁1
+					        	break;   //开锁4
 						default :break;
 					}
 					switch(MCU_Host_Rec.control.RFID){
 						case 0x00: break;    //不处理
-						case 0x01:  Beep_Num = 4;  break;  //RFID正确，蜂鸣器响提示一下
+						case 0x01:  Beep_Num = BEEP_RIGHT_COUNT;  break;     //RFID正确，蜂鸣器响提示一下
+						case 0x02:	Beep_Num = BEEP_ERROR_COUNT;break;  //RFID正确，蜂鸣器响提示一下
 						default :break;
 					}
 					switch(MCU_Host_Rec.control.check){
@@ -441,7 +443,7 @@ void PC_Communication_Time_ISR(void )
 				PC_Answer.answer_numout = NANSWER_NUMOUT;
 				PC_Answer.answer_state = 0;	
 				Usart2_Control_Data.rx_aframe = 0;	//避免和PC通讯过程有人刷卡，通讯结束后直接响应开门
-				Usart3_Control_Data.rx_aframe = 0;			
+//				Usart3_Control_Data.rx_aframe = 0;			
 		}
 		if(PC_Answer.answer_numout > 0){
 				PC_Answer.answer_numout=PC_Answer.answer_numout;//自减操作不在这里
@@ -450,13 +452,19 @@ void PC_Communication_Time_ISR(void )
 				PC_Answer.Nanswer_timeout = NANSWER_TIME;
 				PC_Answer.answer_numout = NANSWER_NUMOUT;
 				Usart2_Control_Data.rx_aframe = 0;	//避免和PC通讯过程有人刷卡，通讯结束后直接响应开门
-				Usart3_Control_Data.rx_aframe = 0;
+//				Usart3_Control_Data.rx_aframe = 0;
 				PC_Answer.answer_state = 0;				
 		}
 	}
 }
 
-
+//=============================================================================
+//函数名称:Comm_Upload_state
+//功能概要:通讯主动上传MCU外设状态
+//参数名称:无
+//函数返回:无
+//注意    :无
+//=============================================================================
 void Comm_Upload_state(void)
 {
 	u16 crc;   

@@ -34,7 +34,7 @@ void BEEP_GPIO_Config(void)
 //功能概要:蜂鸣器响，使用定时器来实现
 //参数名称:无
 //函数返回:无
-//注意    :
+//注意    :必须在定时器调用
 //=============================================================================
 
 void Beep_Response(void )
@@ -45,16 +45,17 @@ void Beep_Response(void )
 		retry--;
 		if(retry <=0){
 			if(beep_state){
-			   BEEP_OFF;
+			   BEEP_ON;
 			   beep_state = 0;
 			}else{
-			   BEEP_ON;
+			   BEEP_OFF;
 			   Beep_Num--;
 			   beep_state = 1;
 			}
 			retry = 50;
 		}
 	}
+	
 }
 
 

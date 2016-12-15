@@ -43,7 +43,7 @@ typedef uint32	ulong;		/**< 32-bit value */
 #define TxBufMax 512
 
 /*自动成帧超时定时时间*/
-#define AUTO_FRAME_TIMEOUT1  50  //10*2ms
+#define AUTO_FRAME_TIMEOUT1  10  //10*2ms
 #define AUTO_FRAME_TIMEOUT2  10  //10*2ms
 #define AUTO_FRAME_TIMEOUT3  10  //10*2ms
 /*自动成帧超时定时时间*/
@@ -53,10 +53,8 @@ typedef uint32	ulong;		/**< 32-bit value */
 #define NANSWER_TIME	 1000	  //1000*5ms
 #define NANSWER_NUMOUT	 	 3	  //1000*5ms
 
-#define SEND_MEDICINE_TIMEOUT		200    //发药过程中检测到没有药，超时200*5MS后停止
-#define IRQ_TIMEOUT							4			//中断软件延时时间
-#define	MOTOR_START_DELAYTIME		40		//每个电机启动延时间隔
-
+#define BEEP_RIGHT_COUNT  3									//RFID正确。蜂鸣器响的次数
+#define BEEP_ERROR_COUNT  5									//RFID错误。蜂鸣器响的次数
 /*************define type end*******************/
 
 /*************union type start*******************/

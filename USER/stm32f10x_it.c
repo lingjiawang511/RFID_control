@@ -145,18 +145,12 @@ void SysTick_Handler(void)
 //=============================================================================
 void TIM2_IRQHandler(void)
 {
-	static u8 key = 0;
 	if ( TIM_GetITStatus(TIM2 , TIM_IT_Update) != RESET ) 
 	{	
 		Led_Flash();
 		Beep_Response();
 		Lock_control();
 		Sensor_check();
-//		key=Key_Scan();
-		if(key >0){
-			Key_ScanNum = key;
-			key = 0;
-		}
 		PC_Communication_Time_ISR();
 		TIM_ClearITPendingBit(TIM2 , TIM_FLAG_Update);  		 
 	}		 	
